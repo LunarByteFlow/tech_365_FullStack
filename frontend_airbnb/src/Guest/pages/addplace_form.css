@@ -1,0 +1,43 @@
+body{
+    background-color: rgb(242, 237, 237);
+}
+.form-border{
+    border:2px solid red;
+}
+
+.button {
+    height:10vh;
+    display: inline-block;
+    padding: 0.75rem 1.5rem; /* Adjust padding as needed */
+    font-size: 2.5rem; /* Adjust font size as needed */
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    border-radius: 0.5rem; /* Adjust border radius as needed */
+    background-color: #4CAF50; /* Change to your desired background color */
+    color: #FFFFFF; /* Change to your desired text color */
+    transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition on hover */
+  }
+  
+  .button:hover {
+    background-color: #e23b86; /* Darken the background color on hover */
+  }
+  
+  /* Additional styles for different button states (optional) */
+  .button:active {
+    background-color: #36733e; /* Darken the background color when clicked */
+  }
+  
+  .button:focus {
+    outline: none; /* Remove default focus outline */
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.2); /* Add custom focus style */
+  }
+  
+  /* Adjustments for disabled state (optional) */
+  .button:disabled {
+    opacity: 0.5; /* Reduce opacity for disabled state */
+    cursor: not-allowed; /* Change cursor for disabled state */
+  }
+  
