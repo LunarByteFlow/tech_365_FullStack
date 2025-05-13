@@ -102,7 +102,7 @@ const UserLoginPage=()=>{
 
       // 5️⃣ redirect by role:
       const role = data.user.role.toLowerCase();
-      navigate(role === "admin" ? "/admin/home" : "/user/home");
+      navigate(role === "admin" ? "/admin" : "/user");
     } catch (err) {
       console.error("Login error:", err);
       Swal.fire({ icon: "error", title: "Login failed", text: err.response?.data?.message || "Please try again" });

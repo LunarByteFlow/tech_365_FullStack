@@ -19,7 +19,7 @@ function App() {
   return (
     <>
       <Route path="/" element={<CurrentUser />} />{" "}
-      <Route path="/admin/home" element={<AdminHome />} />
+      <Route path="/admin" element={<AdminHome />} />
       {/* Dynamically render based on role */}
     </>
   );

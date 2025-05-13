@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Link,useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -57,12 +57,12 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const AdminNavbar = () => {
+const UserNavbar = () => {
   const { dispatch } = useContext(logincontext);
   const classes = useStyles();
   const [drawerOpen, setDrawerOpen] = useState(false);
-
   const navigate = useNavigate();
+
   const toggleDrawer = (open) => (event) => {
     if (
       event.type === "keydown" &&
@@ -74,6 +74,7 @@ const AdminNavbar = () => {
   };
 
   const handleLogout = async () => {
+    console.log("Logout clicked"); // Debug line
     const result = await Swal.fire({
       title: "Are you sure?",
       text: "You will be logged out!",
@@ -85,24 +86,17 @@ const AdminNavbar = () => {
     });
 
     if (result.isConfirmed) {
-      // 1. Clear auth data
       Cookies.remove("authToken");
       Cookies.remove("ROLE");
-
-      // 2. Dispatch logout to context
       dispatch({ type: "LOGOUT" });
 
-      // 3. Show success & redirect
-      Swal.fire(
-        "Logged out",
-        "You have been logged out successfully.",
-        "success"
-      );
+      Swal.fire("Logged out", "You have been logged out successfully.", "success");
       navigate("/login");
     }
   };
+
   const navLinks = [
-    { text: "Create New User", to: "/login" },
+    { text: "Create New User", to: "/register" },
     { text: "Add New Product", to: "/postAnOrder" },
     { text: "Dispatch", to: "/Get_Dispatch" },
     { text: "Orders", to: "/Get_Orders" },
@@ -110,13 +104,9 @@ const AdminNavbar = () => {
     { text: "Inventory Check", to: "/Get_Inventory_Check" },
     { text: "Add Order", to: "/AddOrder" },
     { text: "Update orderrrrr", to: "/update_order" },
-
   ];
 
-  const authLinks = [
-    { text: "Sign Up", to: "/register" },
-    { text: "Logout", onclick: handleLogout },
-  ];
+  const authLinks = [{ text: "Logout", onClick: handleLogout }];
 
   return (
     <div className={classes.root}>
@@ -139,8 +129,7 @@ const AdminNavbar = () => {
             <Button
               key={link.text}
               color="inherit"
-              component={Link}
-              to={link.to}
+              onClick={link.onClick}
               className={classes.button}
             >
               {link.text}
@@ -176,4 +165,4 @@ const AdminNavbar = () => {
   );
 };
 
-export default AdminNavbar;
+export default UserNavbar;

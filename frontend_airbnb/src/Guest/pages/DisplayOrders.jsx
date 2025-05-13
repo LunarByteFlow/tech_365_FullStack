@@ -59,6 +59,7 @@ const DisplayOrders = () => {
       Information of Orders
       </Typography>
 
+
       {orders.map((order, idx) => (
         <Accordion key={idx} sx={{ mb: 2 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
@@ -99,6 +100,8 @@ const DisplayOrders = () => {
             </Paper>
           </AccordionDetails>
         </Accordion>
+
+
       ))}
     </Box>
   );

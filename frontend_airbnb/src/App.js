@@ -12,8 +12,10 @@ import Guest from "./Guest";
 import User from "./User";
 import Admin from "./Admin";
 
+
 import { logincontext } from "./GlobalContext/context";
 import { decodeToken } from "react-jwt";
+import UserNavbar from "./User/components/UserNavbar";
 // import  "./index.css"
 
 //yeh ek object ha jismain names ko folders diye huay hain
@@ -63,6 +65,7 @@ function App() {
 
   return (
     <>
+    
     <CurrentUser />
       {/* Dynamically render based on role */}
     </>

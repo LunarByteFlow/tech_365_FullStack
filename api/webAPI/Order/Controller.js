@@ -1,6 +1,82 @@
 const { connectDB } = require("../../SSMS_DB");
 const sql = require("mssql/msnodesqlv8");
 
+// const postAnOrder = async (req, res) => {
+//   const {
+//     PKD_By,
+//     Built_By,
+//     INS_By,
+//     Type,
+//     Order_No,
+//     QTY,
+//     Model,
+//     Brand,
+//     SERIAL_No,
+//     Description,
+//     Hard_Drive,
+//     Ram,
+//     OS,
+//     Cable,
+//     KB_Mice,
+//     Prime,
+//     Dispatched,
+//     Labels,
+//     Post_Code,
+//     Disp_Date,
+//     MU,
+//   } = req.body;
+
+//   if (!Order_No || !Model || !Brand || !SERIAL_No) {
+//     return res.status(403).json({ message: "Missing Required Fields" });
+//   }
+
+//   try {
+//     await connectDB(); // Ensure you're connected to the database
+
+//     // Create a new SQL Request object
+//     const request = new sql.Request();
+
+//     // Set up the parameters for the query
+//     await request
+//       .input("PKD_By", sql.VarChar, PKD_By)
+//       .input("Built_By", sql.VarChar, Built_By)
+//       .input("INS_By", sql.VarChar, INS_By)
+//       .input("Type", sql.VarChar, Type)
+//       .input("Order_No", sql.VarChar, Order_No)
+//       .input("QTY", sql.Int, QTY)
+//       .input("Model", sql.VarChar, Model)
+//       .input("Brand", sql.VarChar, Brand)
+//       .input("SERIAL_No", sql.VarChar, SERIAL_No)
+//       .input("Description", sql.NVarChar(sql.MAX), Description)
+//       .input("Hard_Drive", sql.VarChar, Hard_Drive)
+//       .input("Ram", sql.VarChar, Ram)
+//       .input("OS", sql.VarChar, OS)
+//       .input("Cable", sql.VarChar, Cable)
+//       .input("KB_Mice", sql.VarChar, KB_Mice)
+//       .input("Prime", sql.VarChar, Prime)
+//       .input("Dispatched", sql.VarChar, Dispatched)
+//       .input("Labels", sql.VarChar, Labels)
+//       .input("Post_Code", sql.VarChar, Post_Code)
+//       .input("Disp_Date", sql.VarChar, Disp_Date)
+//       .input("MU", sql.VarChar, MU).query(`INSERT INTO [February Order Sheet2](
+//                     PKD_By, Built_By, INS_By, Type, Order_No, QTY, Model, Brand, SERIAL_No,
+//                     Description, Hard_Drive, Ram, OS, Cable, KB_Mice, Prime, Dispatched, Labels,
+//                     Post_Code, Disp_Date, MU
+//                   ) VALUES (
+//                     @PKD_By, @Built_By, @INS_By, @Type, @Order_No, @QTY, @Model, @Brand,
+//                     @SERIAL_No, @Description, @Hard_Drive, @Ram, @OS, @Cable, @KB_Mice, @Prime,
+//                     @Dispatched, @Labels, @Post_Code, @Disp_Date, @MU
+//                   )`);
+
+//     res
+//       .status(201)
+//       .json({ success: true, message: "Order added successfully" });
+//   } catch (error) {
+//     console.error("Error creating order:", error);
+//     res.status(500).json({ success: false, error: "Internal Server Error" });
+//   }
+// };
+
 const postAnOrder = async (req, res) => {
   const {
     PKD_By,
@@ -30,14 +106,52 @@ const postAnOrder = async (req, res) => {
     return res.status(403).json({ message: "Missing Required Fields" });
   }
 
+  let transaction;
+
   try {
-    await connectDB(); // Ensure you're connected to the database
+    await connectDB();
 
-    // Create a new SQL Request object
-    const request = new sql.Request();
+    transaction = new sql.Transaction();
+    await transaction.begin();
 
-    // Set up the parameters for the query
-    await request
+    // Step 1: Check available stock
+    const stockRequest = new sql.Request(transaction);
+    const stockResult = await stockRequest
+      .input("Model", sql.VarChar, Model)
+      .query(`SELECT Available FROM [Inventory & Order] WHERE Model = @Model`);
+
+    const availableStock = stockResult.recordset[0]?.Available;
+
+    if (availableStock === undefined) {
+      await transaction.rollback();
+      return res.status(404).json({
+        success: false,
+        message: `Item with Model ${Model} not found in inventory.`,
+      });
+    }
+
+    if (availableStock < QTY) {
+      await transaction.rollback();
+      return res.status(400).json({
+        success: false,
+        message: `Not enough stock for model ${Model}.`,
+      });
+    }
+
+    // Step 2: Deduct ordered quantity from inventory
+    const updateRequest = new sql.Request(transaction);
+    await updateRequest
+      .input("Model", sql.VarChar, Model)
+      .input("QTY", sql.Int, QTY)
+      .query(`
+        UPDATE [Inventory & Order]
+        SET Available = Available - @QTY
+        WHERE Model = @Model
+      `);
+
+    // Step 3: Insert the order into the order sheet
+    const insertRequest = new sql.Request(transaction);
+    await insertRequest
       .input("PKD_By", sql.VarChar, PKD_By)
       .input("Built_By", sql.VarChar, Built_By)
       .input("INS_By", sql.VarChar, INS_By)
@@ -58,21 +172,38 @@ const postAnOrder = async (req, res) => {
       .input("Labels", sql.VarChar, Labels)
       .input("Post_Code", sql.VarChar, Post_Code)
       .input("Disp_Date", sql.VarChar, Disp_Date)
-      .input("MU", sql.VarChar, MU).query(`INSERT INTO [February Order Sheet2](
-                    PKD_By, Built_By, INS_By, Type, Order_No, QTY, Model, Brand, SERIAL_No,
-                    Description, Hard_Drive, Ram, OS, Cable, KB_Mice, Prime, Dispatched, Labels,
-                    Post_Code, Disp_Date, MU
-                  ) VALUES (
-                    @PKD_By, @Built_By, @INS_By, @Type, @Order_No, @QTY, @Model, @Brand,
-                    @SERIAL_No, @Description, @Hard_Drive, @Ram, @OS, @Cable, @KB_Mice, @Prime,
-                    @Dispatched, @Labels, @Post_Code, @Disp_Date, @MU
-                  )`);
+      .input("MU", sql.VarChar, MU)
+      .query(`
+        INSERT INTO [February Order Sheet2](
+          PKD_By, Built_By, INS_By, Type, Order_No, QTY, Model, Brand, SERIAL_No,
+          Description, Hard_Drive, Ram, OS, Cable, KB_Mice, Prime, Dispatched, Labels,
+          Post_Code, Disp_Date, MU
+        ) VALUES (
+          @PKD_By, @Built_By, @INS_By, @Type, @Order_No, @QTY, @Model, @Brand,
+          @SERIAL_No, @Description, @Hard_Drive, @Ram, @OS, @Cable, @KB_Mice, @Prime,
+          @Dispatched, @Labels, @Post_Code, @Disp_Date, @MU
+        )
+      `);
 
-    res
-      .status(201)
-      .json({ success: true, message: "Order added successfully" });
+    // Step 4: Commit the transaction
+    await transaction.commit();
+
+    res.status(201).json({
+      success: true,
+      message: "Order added successfully and inventory updated.",
+    });
+
   } catch (error) {
     console.error("Error creating order:", error);
+
+    if (transaction) {
+      try {
+        await transaction.rollback();
+      } catch (rollbackError) {
+        console.error("Error during transaction rollback:", rollbackError);
+      }
+    }
+
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };

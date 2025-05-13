@@ -1,40 +1,31 @@
 //import routing
 import { Route, Routes } from "react-router-dom";
-
-// import Navbar from "../Guest/components/Navbar";
-import UserProfile from "./components/UserProfile";
-import AddNewPlace from "../Guest/pages/AddNewOrder";
 import AdminHome from "./components/AdminHome";
-import UserHome from "../User/components/UserHome";
-import AdminNavbar from "./components/AdminNavbar";
+import LowStockTable from "./components/LowStockTable";
+import UpdateOrderForm from "../Guest/pages/UpdateOrderForm";
+import DisplayInventoryCheck from "../Guest/pages/DisplayInventoryCheck";
+import DisplayInventoryOrder from "../Guest/pages/DisplayInventoryOrder";
+import DisplayOrders from "../Guest/pages/DisplayOrders";
+import DisplayDispatch from "../Guest/pages/DisplayDispatch";
+import AddNewOrder from "../Guest/pages/AddNewOrder.jsx"
+import DownloadCSV from "./components/DownloadCSV.jsx";
 
 export default function Admin() {
   return (
     <>
-      <AdminNavbar/>
       <Routes>
-        <Route
-          exact
-          path="/admin/home"
-          element={
-            <>
-              <AdminHome />
-            </>
-          }
-        ></Route>
+      <Route path="/" element={<AdminHome />} />
+      <Route path="low-stock" element={<LowStockTable />} />
+      <Route path="Get_Dispatch" element={<DisplayDispatch />} />
+      <Route path="Get_Orders" element={<DisplayOrders />} />
+      <Route path="Get_Inventory_Check" element={<DisplayInventoryCheck />} />
+      <Route path="Get_Inventory_Order" element={<DisplayInventoryOrder />} />
+      <Route path="update_order" element={<UpdateOrderForm />} />
+      <Route path="AddOrder" element={<AddNewOrder />} />
+      <Route path="download_csv" element={<DownloadCSV />} />
 
-        <Route
-          exact
-          path="/postAnAdd"
-          element={
-            <>
-              <AddNewPlace />
-            </>
-          }
-        ></Route>
-        <Route path="/user/home" element={<UserHome />}></Route>
-        <Route path="/admin/home" element={<AdminHome />}></Route>
-      </Routes>
+    </Routes>
     </>
   );
 }
+

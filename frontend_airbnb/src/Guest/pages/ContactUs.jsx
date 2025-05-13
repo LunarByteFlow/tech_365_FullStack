@@ -7,7 +7,6 @@ const ContactUs = () => {
   const [message, setMessage] = useState("");
 
   const handleContactSubmit = async (e) => {
-
     try {
       e.preventDefault();
       // Create an object to represent the data
@@ -17,12 +16,7 @@ const ContactUs = () => {
         contactemail: contactEmail,
         message: message,
       };
-      // const postData = new FormData();
-      // postData.append("contactname", contactName);
-      // postData.append("contactemail", contactEmail);
-      // postData.append("message", message);
 
-      // Make a POST request to your backend API
       const response = await axios.post(
         "http://localhost:1234/api/contactSubmit",
         postData

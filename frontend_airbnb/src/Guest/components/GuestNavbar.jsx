@@ -16,7 +16,6 @@ import MenuIcon from "@material-ui/icons/Menu";
 import { logincontext } from "../../GlobalContext/context";
 import Swal from "sweetalert2";
 import "../../User/components/defaultStyles.css";
-import Cookies from "js-cookie";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -72,43 +71,14 @@ const UserNavbar = () => {
     }
     setDrawerOpen(open);
   };
-
-  const handleLogout = async () => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You will be logged out!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3182ce",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, logout",
-    });
-
-    if (result.isConfirmed) {
-      // 1. Clear auth data
-      Cookies.remove("authToken");
-      Cookies.remove("ROLE");
-
-      // 2. Dispatch logout to context
-      dispatch({ type: "LOGOUT" });
-
-      // 3. Show success & redirect
-      Swal.fire(
-        "Logged out",
-        "You have been logged out successfully.",
-        "success"
-      );
-      navigate("/login");
-    }
-  };
   const navLinks = [
-    { text: "Post Order", to: "/postAnOrder" },
+    
     { text: "Dispatch", to: "/Get_Dispatch" },
     { text: "Orders", to: "/Get_Orders" },
     { text: "Inventory Order", to: "/Get_Inventory_Order" },
     { text: "Inventory Check", to: "/Get_Inventory_Check" },
-    { text: "Add Order", to: "/AddOrder" },
-    { text: "Update orderrrrr", to: "/update_order" },
+    
+    
   ];
 
   const authLinks = [
