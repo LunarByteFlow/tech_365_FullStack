@@ -18,7 +18,8 @@ const Returns_Router = require("./webAPI/Returns/Router.js");
 const UserRouter = require("./webAPI/User/Router.js")
 // app.use(bodyParser.json());
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+}));
 
 app.use("/api", orderRouter);
 app.use("/api", DispatchRouter);
