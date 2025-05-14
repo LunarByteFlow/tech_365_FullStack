@@ -28,7 +28,7 @@ const LowStockTable = () => {
   useEffect(() => {
     const fetchLowStock = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/api/low-stock-items");
+        const response = await axios.get("https://c1cb-86-22-227-192.ngrok-free.app/api/low-stock-items");
         setItems(response.data.data);
         setLoading(false);
       } catch (err) {
