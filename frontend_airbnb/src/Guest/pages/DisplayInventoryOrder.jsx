@@ -23,7 +23,7 @@ const DisplayInventoryOrder = () => {
   useEffect(() => {
     const fetchInventoryData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/Get_Inventory_Order');
+        const response = await axios.get('https://c1cb-86-22-227-192.ngrok-free.app/api/Get_Inventory_Order');
         setInventoryData(response.data.data); // 👈 Adjust based on your actual response structure
       } catch (error) {
         setError('Error fetching inventory order data');
