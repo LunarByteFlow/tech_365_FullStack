@@ -23,7 +23,7 @@ const DisplayDispatch = () => {
   useEffect(() => {
     const fetchDispatchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/Get_Dispatch');
+        const response = await axios.get('https://tech-365-full-stack.vercel.app/api/Get_Dispatch');
         setDispatchData(response.data.data);
       } catch (error) {
         setError('Error fetching dispatch data');
