@@ -29,7 +29,7 @@ function DownloadCSV() {
   };
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/Get_Orders')
+    fetch('https://c1cb-86-22-227-192.ngrok-free.app/api/Get_Orders')
       .then(res => res.json())
       .then(result => {
         const orders = result.data;
