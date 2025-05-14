@@ -82,7 +82,7 @@ const AddNewOrder = () => {
     const fetchInventoryOptions = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:8000/api/Get_Inventory_Order"
+          "https://c1cb-86-22-227-192.ngrok-free.app/api/Get_Inventory_Order"
         );
         const data = response.data.data;
 
