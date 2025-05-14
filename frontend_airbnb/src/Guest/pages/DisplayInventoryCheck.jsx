@@ -23,7 +23,7 @@ const DisplayInventoryCheck = () => {
   useEffect(() => {
     const fetchInventoryData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/Get_Inventory_Check');
+        const response = await axios.get('https://c1cb-86-22-227-192.ngrok-free.app/api/Get_Inventory_Check');
         setInventoryData(response.data.data); // 👈 Correct path to the array
       } catch (error) {
         setError('Error fetching inventory check data');
