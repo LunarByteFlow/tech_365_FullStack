@@ -25,7 +25,7 @@ const DisplayOrders = () => {
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get('http://localhost:8000/api/Get_Orders');
+        const res = await axios.get('https://c1cb-86-22-227-192.ngrok-free.app/api/Get_Orders');
         setOrders(res.data.data);
       } catch (err) {
         setError('Failed to fetch orders');
