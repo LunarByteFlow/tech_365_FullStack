@@ -18,6 +18,7 @@ const DisplayInventoryCheck = () => {
   const [inventoryData, setInventoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const displayValue = (val) =>
     val !== undefined && val !== null && val !== '' ? val : 'Not Available';

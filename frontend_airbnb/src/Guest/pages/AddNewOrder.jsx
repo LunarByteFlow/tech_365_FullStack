@@ -75,6 +75,7 @@ const AddNewOrder = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
   const navigate = useNavigate();
   const classes = useStyles();
 
@@ -82,7 +83,7 @@ const AddNewOrder = () => {
     const fetchInventoryOptions = async () => {
       try {
         const response = await axios.get(
-          "https://c1cb-86-22-227-192.ngrok-free.app/api/Get_Inventory_Order"
+          `${API_BASE_URL}/api/Get_Inventory_Order`
         );
         const data = response.data.data;
 

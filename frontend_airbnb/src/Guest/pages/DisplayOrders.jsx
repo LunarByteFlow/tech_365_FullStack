@@ -17,6 +17,7 @@ const DisplayOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   // Simplified displayValue function
   const displayValue = (value) => value || "Not Available";
@@ -25,7 +26,7 @@ const DisplayOrders = () => {
     const fetchOrders = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:8000/api/Get_Orders",
+          `${API_BASE_URL}/api/Get_Orders`,
           {
             headers: {
               Accept: "application/json",

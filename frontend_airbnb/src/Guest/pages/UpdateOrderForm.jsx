@@ -63,6 +63,7 @@ const UpdateOrderForm = () => {
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
   const classes = useStyles();
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,7 +114,7 @@ const UpdateOrderForm = () => {
     }
 
     try {
-      await axios.put("https://c1cb-86-22-227-192.ngrok-free.app/api/update-order", formData, {
+      await axios.put(`${API_BASE_URL}/api/update-order`, formData, {
         headers: {
           "Content-Type": "application/json",
         },
