@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "frontend_airbnb/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "outputDirectory": "build" 
+      }
+    },
+    {
+      "src": "api/index.js", 
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)", 
+      "dest": "/api/index.js" 
+    },
+    {
+      "src": "/(.*)", 
+      "dest": "/frontend_airbnb/$1" 
+    }
+  ],
+ 
+  "installCommand": "yarn install && yarn install --cwd ./api && yarn install --cwd ./frontend_airbnb",
+  "buildCommand": "yarn build --cwd ./frontend_airbnb"
+  
