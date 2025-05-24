@@ -83,7 +83,6 @@ const UserNavbar = () => {
 
   const authLinks = [
     { text: "Login", to:'/login' },
-    { text: "Register", to:'/register' },
   ];
 
   return (

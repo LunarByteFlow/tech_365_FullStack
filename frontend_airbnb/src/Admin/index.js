@@ -15,6 +15,8 @@ export default function Admin() {
     <>
       <Routes>
       <Route path="/" element={<AdminHome />} />
+      <Route path="*" element={<AdminHome />} />
+      <Route path="admin" element={<AdminHome />} />
       <Route path="low-stock" element={<LowStockTable />} />
       <Route path="Get_Dispatch" element={<DisplayDispatch />} />
       <Route path="Get_Orders" element={<DisplayOrders />} />
@@ -23,7 +25,6 @@ export default function Admin() {
       <Route path="update_order" element={<UpdateOrderForm />} />
       <Route path="AddOrder" element={<AddNewOrder />} />
       <Route path="download_csv" element={<DownloadCSV />} />
-
     </Routes>
     </>
   );

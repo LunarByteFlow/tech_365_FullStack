@@ -1,136 +1,120 @@
 import React from 'react';
-import { makeStyles, Grid, TextField, Button, Typography, IconButton } from '@material-ui/core';
+import {
+  Grid,
+  TextField,
+  Button,
+  Typography,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from '@mui/material';
+import { makeStyles } from '@material-ui/core/styles';
 import MailOutlineIcon from '@material-ui/icons/MailOutline';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import TwitterIcon from '@material-ui/icons/Twitter';
 import LinkedInIcon from '@material-ui/icons/LinkedIn';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 
 const useStyles = makeStyles((theme) => ({
   footer: {
     backgroundColor: '#1a1a1a',
     color: '#fff',
-    padding: theme.spacing(6, 4),
-    fontFamily: 'Roboto, sans-serif',
+    padding: theme.spacing(6),
+    textAlign: 'center',
   },
   title: {
-    fontWeight: 'bold',
-    marginBottom: theme.spacing(2),
+    fontWeight: 600,
+    marginBottom: theme.spacing(3),
   },
-  inputField: {
-    width: '100%',
-    maxWidth: 300,
-    marginBottom: theme.spacing(2),
+  subscribeSection: {
+    marginBottom: theme.spacing(4),
   },
   subscribeButton: {
-    width: '100%',
-    maxWidth: 300,
+    marginTop: theme.spacing(2),
   },
   socialIcons: {
     display: 'flex',
     justifyContent: 'center',
-    marginBottom: theme.spacing(2),
+    gap: theme.spacing(2),
+    marginTop: theme.spacing(3),
   },
 }));
 
 const Footer = () => {
   const classes = useStyles();
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Add logic to handle newsletter subscription
-    alert('Thank you for subscribing!');
-  };
-
   const [open, setOpen] = React.useState(false);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleDialogOpen = () => setOpen(true);
+  const handleDialogClose = () => setOpen(false);
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleDialogSubmit = (e) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const email = data.get('email');
+    console.log('Subscribed email:', email);
+    alert('Thank you for subscribing!');
+    handleDialogClose();
   };
 
   return (
     <footer className={classes.footer}>
-      <Typography variant="h6" className={classes.title}>
-        Subscribe to Our Newsletter
-      </Typography>
-      <form onSubmit={handleSubmit}>
-        <TextField
-          className={classes.inputField}
-          variant="outlined"
-          label="Enter your email"
-          type="email"
-          required
-        />
+      <div className={classes.subscribeSection}>
+        <Typography variant="h6" className={classes.title}>
+          Subscribe to Our Newsletter
+        </Typography>
         <Button
-          className={classes.subscribeButton}
           variant="contained"
           color="primary"
-          type="submit"
           startIcon={<MailOutlineIcon />}
+          onClick={handleDialogOpen}
         >
           Subscribe
         </Button>
-        <Dialog
-        open={open}
-        onClose={handleClose}
-        PaperProps={{
-          component: 'form',
-          onSubmit: (event) => {
-            event.preventDefault();
-            const formData = new FormData(event.currentTarget);
-            const formJson = Object.fromEntries(formData.entries());
-            const email = formJson.email;
-            console.log(email);
-            handleClose();
-          },
-        }}
-      >
-        <DialogTitle>Subscribe</DialogTitle>
-        <DialogContent>
-          <DialogContentText>
-            To subscribe to this website, please enter your email address here. We
-            will send updates occasionally.
-          </DialogContentText>
-          <TextField
-            autoFocus
-            required
-            margin="dense"
-            id="name"
-            name="email"
-            label="Email Address"
-            type="email"
-            fullWidth
-            variant="standard"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button type="submit">Subscribe</Button>
-        </DialogActions>
-      </Dialog>
-      </form>
+      </div>
+
       <div className={classes.socialIcons}>
-        <IconButton color="inherit">
+        <IconButton color="inherit" aria-label="Facebook">
           <FacebookIcon />
         </IconButton>
-        <IconButton color="inherit">
+        <IconButton color="inherit" aria-label="Twitter">
           <TwitterIcon />
         </IconButton>
-        <IconButton color="inherit">
+        <IconButton color="inherit" aria-label="LinkedIn">
           <LinkedInIcon />
         </IconButton>
       </div>
-      <Typography variant="body2" align="center">
-        Connect with us on social media for more updates.
+
+      <Typography variant="body2" style={{ marginTop: '1.5rem' }}>
+        Connect with us on social media for updates and more.
       </Typography>
+
+      {/* Dialog */}
+      <Dialog open={open} onClose={handleDialogClose}>
+        <form onSubmit={handleDialogSubmit}>
+          <DialogTitle>Subscribe</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Enter your email address to receive our latest news and updates.
+            </DialogContentText>
+            <TextField
+              autoFocus
+              fullWidth
+              required
+              margin="dense"
+              name="email"
+              label="Email Address"
+              type="email"
+              variant="standard"
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleDialogClose}>Cancel</Button>
+            <Button type="submit">Subscribe</Button>
+          </DialogActions>
+        </form>
+      </Dialog>
     </footer>
   );
 };

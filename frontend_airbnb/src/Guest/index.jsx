@@ -14,10 +14,12 @@ import UpdateOrderForm from "./pages/UpdateOrderForm.jsx";
 import GuestHome from "./pages/GuestHome";
 import UserHome from "../User/components/UserHome.jsx";
 import AdminHome from "../Admin/components/AdminHome.jsx";
+import GuestNavbar from "../Guest/components/GuestNavbar.jsx";
+import Footer from "./pages/Footer.jsx";
 export default function Guest() {
   return (
     <>
-      <Navbar />
+      <GuestNavbar />
 
       <Routes>
         <Route path="/admin/*" element={<Admin />} />
@@ -26,7 +28,6 @@ export default function Guest() {
         <Route path="/" element={<GuestHome />} />
         <Route path="/AddOrder" element={<AddNewOrder />} />
         <Route path="*" element={<Navigate to="/" replace={true} />} />
-        <Route path="/register" element={<RegisterUser />} />
         <Route path="/login" element={<UserLoginPage />} />
         <Route path="/Get_Dispatch" element={<DisplayDispatch />}></Route>
         <Route path="/Get_Orders" element={<DisplayOrders />}></Route>
@@ -42,6 +43,7 @@ export default function Guest() {
         <Route path="/admin" element={<AdminHome />}></Route>
         <Route path="/user" element={<UserHome />}></Route>
       </Routes>
+      <Footer/>
     </>
   );
 }

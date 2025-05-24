@@ -11,7 +11,7 @@ const { connect } = require("connect");
 const dotenv = require("dotenv");
 const { sign } = require("jsonwebtoken");
 const jwt  = require("jsonwebtoken");
-const sql = require('mssql/msnodesqlv8');
+const sql = require('mssql');
 const { connectDB } = require("../../SSMS_DB.js");
 
 

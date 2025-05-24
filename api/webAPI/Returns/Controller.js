@@ -1,5 +1,5 @@
 const { connectDB } = require("../../SSMS_DB");
-const sql = require("mssql/msnodesqlv8");
+const sql = require("mssql");
 
 const Get_Returns = async (req, res) => {
   try {

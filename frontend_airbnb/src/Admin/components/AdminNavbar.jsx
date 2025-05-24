@@ -123,7 +123,7 @@ const AdminNavbar = () => {
             variant="h5"
             className={classes.title}
             component={Link}
-            to="/admin"
+            to="admin"
           >
             tech_365
           </Typography>

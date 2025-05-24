@@ -96,14 +96,14 @@ const UserNavbar = () => {
   };
 
   const navLinks = [
-    { text: "Create New User", to: "/register" },
-    { text: "Add New Product", to: "/postAnOrder" },
-    { text: "Dispatch", to: "/Get_Dispatch" },
-    { text: "Orders", to: "/Get_Orders" },
-    { text: "Inventory Order", to: "/Get_Inventory_Order" },
-    { text: "Inventory Check", to: "/Get_Inventory_Check" },
-    { text: "Add Order", to: "/AddOrder" },
-    { text: "Update orderrrrr", to: "/update_order" },
+    
+    { text: "Add New Product", to: "postAnOrder" },
+    { text: "Dispatch", to: "Get_Dispatch" },
+    { text: "Orders", to: "Get_Orders" },
+    { text: "Inventory Order", to: "Get_Inventory_Order" },
+    { text: "Inventory Check", to: "Get_Inventory_Check" },
+    { text: "Add Order", to: "AddOrder" },
+    { text: "Update orderrrrr", to: "update_order" },
   ];
 
   const authLinks = [{ text: "Logout", onClick: handleLogout }];
@@ -120,7 +120,7 @@ const UserNavbar = () => {
             variant="h5"
             className={classes.title}
             component={Link}
-            to="/admin/home"
+            to="user"
           >
             tech_365
           </Typography>

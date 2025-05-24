@@ -1,27 +1,26 @@
 const sql = require('mssql');
 
 const config = {
-  server: '192.168.0.50', // Replace with your remote server IP or DNS
+  user: 'admin', // your RDS master username
+  password: 't3ch365!!)',
+  server: 'tech365database.c5a8ku0y26sx.eu-north-1.rds.amazonaws.com', // RDS endpoint from AWS console
+  database: 'tech_365', // the DB name you restored
   port: 1433,
-  user: 'administrator',              // or the SQL user you created
-  password: 't3ch355!!)',          // your SQL password
-  // database: 'tech_365',
   options: {
-    encrypt: false, // set to true for Azure
-    trustServerCertificate: true,
-  },
-};
-
-const connectDB = async () => {
-  try {
-    await sql.connect(config);
-    console.log('Connected to remote SQL Server!');
-  } catch (error) {
-    console.error('Connection failed:', error);
-    throw error;
+    encrypt: true, // for Azure and AWS
+    trustServerCertificate: true // for self-signed certs
   }
 };
 
-connectDB();
+async function connectToDb() {
+  try {
+    await sql.connect(config);
+    console.log('Connected to SQL Server');
+  } catch (err) {
+    console.error('DB Connection Failed:', err);
+  }
+}
 
-module.exports = { connectDB };
+connectToDb(); // 👈 this runs the function when you execute the script
+
+module.exports = { sql, connectToDb };

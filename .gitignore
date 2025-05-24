@@ -1,3 +1,4 @@
 node_modules/
 api/node_modules/
 frontend_airbnb/node_modules/
+.env
