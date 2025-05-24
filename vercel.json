@@ -26,4 +26,4 @@
  
   "installCommand": "yarn install && yarn install --cwd ./api && yarn install --cwd ./frontend_airbnb",
   "buildCommand": "yarn build --cwd ./frontend_airbnb"
-  
+}
