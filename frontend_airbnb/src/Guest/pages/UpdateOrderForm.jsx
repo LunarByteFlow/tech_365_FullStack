@@ -113,7 +113,7 @@ const UpdateOrderForm = () => {
     }
 
     try {
-      await axios.put("http://localhost:8000/api/update-order", formData, {
+      await axios.put("https://c1cb-86-22-227-192.ngrok-free.app/api/update-order", formData, {
         headers: {
           "Content-Type": "application/json",
         },

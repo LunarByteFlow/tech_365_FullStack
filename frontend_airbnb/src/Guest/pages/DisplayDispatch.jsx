@@ -23,7 +23,7 @@ const DisplayDispatch = () => {
   useEffect(() => {
     const fetchDispatchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/Get_Dispatch');
+        const response = await axios.get('https://c1cb-86-22-227-192.ngrok-free.app/api/Get_Dispatch');
         setDispatchData(response.data.data);
       } catch (error) {
         setError('Error fetching dispatch data');
