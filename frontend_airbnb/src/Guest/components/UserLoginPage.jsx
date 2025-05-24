@@ -249,7 +249,7 @@ const UserLoginPage = () => {
     e.preventDefault();
 
     try {
-      const { data } = await axios.post(`${API_BASE_URL}/api/login`, credentials);
+      const { data } = await axios.post(`https://tech-365-full-stack.vercel.app/api/login`, credentials);
 
       Cookies.set("authToken", data.authToken, { sameSite: "lax" });
       Cookies.set("ROLE", data.user.role, { sameSite: "lax" });

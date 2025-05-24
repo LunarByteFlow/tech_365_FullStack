@@ -114,7 +114,7 @@ const UpdateOrderForm = () => {
     }
 
     try {
-      await axios.put(`${API_BASE_URL}/api/update-order`, formData, {
+      await axios.put(`https://tech-365-full-stack.vercel.app/api/update-order`, formData, {
         headers: {
           "Content-Type": "application/json",
         },

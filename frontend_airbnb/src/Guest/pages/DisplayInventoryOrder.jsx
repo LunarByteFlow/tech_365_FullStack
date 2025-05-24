@@ -24,7 +24,7 @@ const DisplayInventoryOrder = () => {
   useEffect(() => {
     const fetchInventoryData = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/api/Get_Inventory_Order`);
+        const response = await axios.get(`https://tech-365-full-stack.vercel.app/api/Get_Inventory_Order`);
         setInventoryData(response.data.data); // 👈 Adjust based on your actual response structure
       } catch (error) {
         setError('Error fetching inventory order data');

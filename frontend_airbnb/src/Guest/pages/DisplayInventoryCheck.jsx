@@ -26,7 +26,7 @@ const DisplayInventoryCheck = () => {
   useEffect(() => {
     const fetchInventoryData = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/api/Get_Inventory_Check');
+        const response = await axios.get('https://tech-365-full-stack.vercel.app/api/Get_Inventory_Check');
         setInventoryData(response.data.data);
       } catch (error) {
         setError('Error fetching inventory check data');

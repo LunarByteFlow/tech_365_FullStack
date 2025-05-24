@@ -83,7 +83,7 @@ const AddNewOrder = () => {
     const fetchInventoryOptions = async () => {
       try {
         const response = await axios.get(
-          `${API_BASE_URL}/api/Get_Inventory_Order`
+          `https://tech-365-full-stack.vercel.app/api/Get_Inventory_Order`
         );
         const data = response.data.data;
 

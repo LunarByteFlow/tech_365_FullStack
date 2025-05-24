@@ -74,7 +74,7 @@ const RegisterUser = () => {
       password: password,
     };
     console.log(payload)
-    axios.post(`http://localhost:8000/api/createUser`, payload).then((json) => {
+    axios.post(`https://tech-365-full-stack.vercel.app/api/createUser`, payload).then((json) => {
       const payload2 = {
         name: json.data.name,
         email: json.data.email,
