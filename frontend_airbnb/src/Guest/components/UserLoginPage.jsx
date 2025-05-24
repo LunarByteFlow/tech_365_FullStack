@@ -243,12 +243,13 @@ const UserLoginPage = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const { dispatch } = useContext(logincontext);
   const navigate = useNavigate();
+  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const { data } = await axios.post("https://c1cb-86-22-227-192.ngrok-free.app/api/login", credentials);
+      const { data } = await axios.post(`${API_BASE_URL}/api/login`, credentials);
 
       Cookies.set("authToken", data.authToken, { sameSite: "lax" });
       Cookies.set("ROLE", data.user.role, { sameSite: "lax" });
