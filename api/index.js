@@ -15,7 +15,14 @@ const Inventory_Order_Router = require("./webAPI/Inventory&Order/Router.js");
 const Inventory_Order_Check_Router = require("./webAPI/Inventory-Check/Router.js");
 
 const Returns_Router = require("./webAPI/Returns/Router.js");
+const InventoryAO = require("./webAPI/InventoryAO/Router.js");
+const InventoryDesktops = require("./webAPI/InventoryDesktops/Router.js");
+const InventoryLaptops = require("./webAPI/InventoryLaptops/Router.js");
+const InventoryScreens = require("./webAPI/InventoryScreens/Router.js");
+const InventoryParts = require("./webAPI/InventoryParts/Router.js");
 const UserRouter = require("./webAPI/User/Router.js");
+
+
 // app.use(bodyParser.json());
 app.use(express.json());
 
@@ -46,6 +53,11 @@ app.use("/api", Inventory_Order_Router);
 app.use("/api", Inventory_Order_Check_Router);
 app.use("/api", Returns_Router);
 app.use("/api", UserRouter);
+app.use("/api",InventoryAO);
+// app.use("/api",InventoryDesktops);
+// app.use("/api",InventoryLaptops);
+// app.use("/api",InventoryScreens);
+// app.use("/api",InventoryParts);
 
 // Initialize Database Connection (CRITICAL FOR VERCEL DEPLOYMENT)
 let dbPool; // Declare a variable to hold the connection pool
