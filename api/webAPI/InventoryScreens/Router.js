@@ -1,16 +1,12 @@
-Create_PartInventory,
-    Get_AllPartInventory,
-    Get_PartInventoryById,
-    Update_PartInventory,
-    Delete_PartInventory
-
 const express = require("express");
 const router = express.Router();
-const {Create_PartInventory,
-    Get_AllPartInventory,
-    Get_PartInventoryById,
-    Update_PartInventory,
-    Delete_PartInventory} = require("./Controller.js");
+const {
+  Create_InventoryScreen,
+  Get_AllInventoryScreens,
+  Get_InventoryScreenById,
+  Update_InventoryScreen,
+  Delete_InventoryScreen,
+} = require("./Controller.js");
 
 router.post("/Create_InventoryScreen", Create_InventoryScreen);
 router.get("/Get_AllInventoryScreens", Get_AllInventoryScreens);

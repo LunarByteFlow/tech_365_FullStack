@@ -57,7 +57,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const UserNavbar = () => {
+const TechnicianNavbar = () => {
   const { dispatch } = useContext(logincontext);
   const classes = useStyles();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -120,7 +120,7 @@ const UserNavbar = () => {
             variant="h5"
             className={classes.title}
             component={Link}
-            to="user"
+            to="technician"
           >
             tech_365
           </Typography>
@@ -165,4 +165,4 @@ const UserNavbar = () => {
   );
 };
 
-export default UserNavbar;
+export default TechnicianNavbar;

@@ -120,7 +120,7 @@ const ProductFinishNavbar = () => {
             variant="h5"
             className={classes.title}
             component={Link}
-            to="user"
+            to="product_finish"
           >
             tech_365
           </Typography>

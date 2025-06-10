@@ -9,20 +9,25 @@ import {
 
 //yahan hum pury folders import krwa rahy ku k app.jsx se hi pata chalega k konsa folder chahiye
 import Guest from "./Guest";
-import User from "./User";
 import Admin from "./Admin";
+import Technician from "./Technician";
+import Inventory from "./Inventory";
+import ProductFinish from "./ProductFinish";
+
 
 
 import { logincontext } from "./GlobalContext/context";
 import { decodeToken } from "react-jwt";
-import UserNavbar from "./User/components/UserNavbar";
+import Inventory from "./Inventory";
 // import  "./index.css"
 
 //yeh ek object ha jismain names ko folders diye huay hain
 const ComponentByRole = {
-  user: User,
   guest: Guest,
   admin: Admin,
+  inventory: Inventory,
+  Technician: Technician,
+  Inventory: Inventory,
 };
 
 //ab hum function bana rahy iska format hota ha const naamOfFunction = (parameters jo isky hoty) => {yahan jo bhi wo kr k return krta}

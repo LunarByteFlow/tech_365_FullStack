@@ -1,4 +1,4 @@
-const { connectDB } = require("../SSMS_DB"); // Adjust path as needed
+const { connectDB } = require("../../SSMS_DB"); // Adjust path as needed
 const sql = require("mssql");
 
 // --- CREATE Inventory Screen ---

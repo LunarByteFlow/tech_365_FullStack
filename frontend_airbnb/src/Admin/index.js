@@ -14,6 +14,7 @@ export default function Admin() {
   return (
     <>
       <Routes>
+        
       <Route path="/" element={<AdminHome />} />
       <Route path="*" element={<AdminHome />} />
       <Route path="admin" element={<AdminHome />} />

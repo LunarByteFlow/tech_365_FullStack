@@ -1,82 +1,102 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Button, Typography
+  TextField, Button, Paper, Typography, Stack
 } from '@mui/material';
 
-const InventoryParts = ({ onEdit }) => {
-  const [parts, setParts] = useState([]);
+const BASE_URL = "http://localhost:8000/api";
 
-  const fetchParts = async () => {
-    try {
-      const res = await axios.get('/api/parts'); // Adjust URL
-      setParts(res.data.data);
-    } catch (error) {
-      console.error(error);
-    }
+const InventoryParts = ({ editingPart, onCancel, onSuccess }) => {
+  const initialForm = {
+    Inventory_Parts_ID: '',
+    Facility: '',
+    Location_: '',
+    Brand: '',
+    Model: '',
+    Type_: '',
+    Comments: '',
+    QTY_Recieved: '',
+    QTY_On_Hand: '',
   };
 
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/api/parts/${id}`);
-      fetchParts();
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const [form, setForm] = useState(initialForm);
 
+  // Pre-fill form when editing
   useEffect(() => {
-    fetchParts();
-  }, []);
+    if (editingPart) {
+      setForm({
+        ...editingPart,
+        QTY_Recieved: editingPart.QTY_Recieved ?? '',
+        QTY_On_Hand: editingPart.QTY_On_Hand ?? '',
+      });
+    } else {
+      setForm(initialForm);
+    }
+  }, [editingPart]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+    try {
+      if (editingPart) {
+        // Update existing part
+        await axios.put(`${BASE_URL}/Update_PartInventory/${editingPart.Inventory_Parts_ID}`, form);
+      } else {
+        // Create new part
+        await axios.post(`${BASE_URL}/Create_PartInventory`, form);
+      }
+      onSuccess(); // callback to refresh list + close form
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   return (
-    <Paper sx={{ padding: 2 }}>
-      <Typography variant="h5" gutterBottom>Part Inventory</Typography>
-      <Button variant="contained" onClick={() => onEdit(null)} sx={{ mb: 2 }}>
-        Add New Part
-      </Button>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Brand</TableCell>
-              <TableCell>Model</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Qty On Hand</TableCell>
-              <TableCell>Actions</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {parts.map((part) => (
-              <TableRow key={part.Inventory_Parts_ID}>
-                <TableCell>{part.Brand}</TableCell>
-                <TableCell>{part.Model}</TableCell>
-                <TableCell>{part.Type_}</TableCell>
-                <TableCell>{part.QTY_On_Hand}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => onEdit(part)}
-                    sx={{ mr: 1 }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="error"
-                    onClick={() => handleDelete(part.Inventory_Parts_ID)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+    <Paper sx={{ padding: 2, mt: 2 }}>
+      <Typography variant="h6" gutterBottom>
+        {editingPart ? 'Edit Part' : 'Add New Part'}
+      </Typography>
+      <Stack spacing={2}>
+        <TextField
+          label="Inventory Parts ID"
+          name="Inventory_Parts_ID"
+          value={form.Inventory_Parts_ID}
+          onChange={handleChange}
+          disabled={!!editingPart} // Disable when editing
+        />
+        <TextField label="Facility" name="Facility" value={form.Facility} onChange={handleChange} />
+        <TextField label="Location" name="Location_" value={form.Location_} onChange={handleChange} />
+        <TextField label="Brand" name="Brand" value={form.Brand} onChange={handleChange} />
+        <TextField label="Model" name="Model" value={form.Model} onChange={handleChange} />
+        <TextField label="Type" name="Type_" value={form.Type_} onChange={handleChange} />
+        <TextField label="Comments" name="Comments" value={form.Comments} onChange={handleChange} />
+        <TextField
+          label="QTY Recieved"
+          name="QTY_Recieved"
+          type="number"
+          value={form.QTY_Recieved}
+          onChange={handleChange}
+        />
+        <TextField
+          label="QTY On Hand"
+          name="QTY_On_Hand"
+          type="number"
+          value={form.QTY_On_Hand}
+          onChange={handleChange}
+        />
+
+        <Stack direction="row" spacing={2}>
+          <Button variant="contained" onClick={handleSubmit}>
+            {editingPart ? 'Update' : 'Create'}
+          </Button>
+          <Button variant="outlined" onClick={onCancel}>
+            Cancel
+          </Button>
+        </Stack>
+      </Stack>
     </Paper>
   );
 };

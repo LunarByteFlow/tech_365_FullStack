@@ -1,4 +1,6 @@
-const { connectDB } = require("../SSMS_DB"); // Adjust path as necessary to your DB connection
+
+const { connectDB } = require("../../SSMS_DB");
+ // Adjust path as necessary to your DB connection
 const sql = require("mssql");
 
 // --- CREATE Part Inventory ---

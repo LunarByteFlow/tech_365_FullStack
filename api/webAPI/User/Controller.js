@@ -29,14 +29,22 @@ const JWT_SECRET = "jbhjbhebfjkdnnbjknuejejnn";
 const createUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
+  // Allowed roles for registration
+  const allowedRoles = ["admin", "technician",'Inventory', "productfinish"];
+
   // Validate required fields
   if (!name || !email || !password) {
     return res.status(400).json({ message: "Missing required fields" });
   }
 
+  // Validate role
+  if (!allowedRoles.includes(role)) {
+    return res.status(400).json({ message: `Invalid role. Allowed roles: ${allowedRoles.join(", ")}` });
+  }
+
   try {
-    // Connect to SQL Server using the connectDB function
-    await connectDB();  // Establish the connection
+    // Connect to SQL Server
+    await connectDB();
 
     // Check if user already exists
     const checkUser = await sql.query`SELECT * FROM Users WHERE email = ${email}`;
@@ -50,23 +58,20 @@ const createUser = async (req, res) => {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Sanitize role
-    const userRole = role === "admin" ? "admin" : "user";
-
-    // Insert new user into the database
+    // Insert new user into the database with the requested role
     await sql.query`
       INSERT INTO Users (name, email, password, role)
-      VALUES (${name}, ${email}, ${hashedPassword}, ${userRole})
+      VALUES (${name}, ${email}, ${hashedPassword}, ${role})
     `;
 
-    // Create JWT token
+    // Create JWT token with role
     const authToken = jwt.sign(
-      { name, email, role: userRole },
+      { name, email, role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
 
-    // Send cookie
+    // Send cookie with token
     res.cookie("authToken", authToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -81,7 +86,7 @@ const createUser = async (req, res) => {
       user: {
         name,
         email,
-        role: userRole,
+        role,
       },
     });
   } catch (error) {
@@ -89,6 +94,7 @@ const createUser = async (req, res) => {
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
+
 
 const Login = async (req, res) => {
   const { email, password } = req.body;
@@ -180,3 +186,4 @@ module.exports = {
   getUser,
   Login,
 };
+

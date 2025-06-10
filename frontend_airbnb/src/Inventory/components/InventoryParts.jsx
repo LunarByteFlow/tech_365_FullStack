@@ -4,13 +4,13 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Typography
 } from '@mui/material';
-
+const BASE_URL= "http://localhost:8000/api"
 const InventoryParts = () => {
   const [parts, setParts] = useState([]);
 
   const fetchParts = async () => {
     try {
-      const res = await axios.get('/api/parts'); // Adjust URL if needed
+      const res = await axios.get(`${BASE_URL}/Get_AllPartInventory`); // Adjust URL if needed
       setParts(res.data.data);
     } catch (error) {
       console.error('Error fetching parts:', error);

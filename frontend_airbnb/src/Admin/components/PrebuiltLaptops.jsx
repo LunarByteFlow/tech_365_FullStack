@@ -1,0 +1,334 @@
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  Paper, Button, Typography, Dialog, DialogTitle, DialogContent,
+  DialogActions, TextField, Grid
+} from "@mui/material";
+
+const BASE_URL = "http://localhost:8000/api";
+
+const emptyLaptop = {
+  Prebuilt_ID: "",
+  Built_By: "",
+  Install_By: "",
+  Item_Type: "",
+  QTY: "",
+  Model: "",
+  Brand: "",
+  SERIAL_NO: "",
+  Processor: "",
+  RAM: "",
+  Hard_Drive: "",
+  OS: "",
+  Screen_Size: "",
+  Resolution: "",
+  Location_: "",
+};
+
+const PrebuiltLaptops = () => {
+  const [laptops, setLaptops] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingLaptop, setEditingLaptop] = useState(null);
+  const [formData, setFormData] = useState(emptyLaptop);
+  const [loading, setLoading] = useState(false);
+
+  // Fetch all laptops
+  const fetchLaptops = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${BASE_URL}/GetAllPrebuiltLaptops`);
+      if (res.data.success) {
+        setLaptops(res.data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching laptops:", error);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchLaptops();
+  }, []);
+
+  // Open dialog to add or edit
+  const handleOpenDialog = (laptop = null) => {
+    if (laptop) {
+      setEditingLaptop(laptop);
+      setFormData(laptop);
+    } else {
+      setEditingLaptop(null);
+      setFormData(emptyLaptop);
+    }
+    setOpenDialog(true);
+  };
+
+  // Close dialog
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setEditingLaptop(null);
+    setFormData(emptyLaptop);
+  };
+
+  // Handle form input change
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  // Submit form for create or update
+  const handleSubmit = async () => {
+    try {
+      if (editingLaptop) {
+        // Update
+        await axios.put(`${BASE_URL}/UpdatePrebuiltLaptop/${editingLaptop.Prebuilt_Laptops_ID}`, formData);
+      } else {
+        // Create
+        await axios.post(`${BASE_URL}/CreatePrebuiltLaptop`, formData);
+      }
+      fetchLaptops();
+      handleCloseDialog();
+    } catch (error) {
+      console.error("Error saving laptop:", error);
+      alert("Failed to save laptop. Please check console for details.");
+    }
+  };
+
+  // Delete laptop
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this laptop?")) return;
+
+    try {
+      await axios.delete(`${BASE_URL}/DeletePrebuiltLaptop/${id}`);
+      fetchLaptops();
+    } catch (error) {
+      console.error("Error deleting laptop:", error);
+      alert("Failed to delete laptop.");
+    }
+  };
+
+  return (
+    <Paper sx={{ padding: 3 }}>
+      <Typography variant="h4" gutterBottom>Prebuilt Laptops Inventory</Typography>
+      <Button variant="contained" onClick={() => handleOpenDialog(null)} sx={{ mb: 2 }}>
+        Add New Laptop
+      </Button>
+
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Model</TableCell>
+              <TableCell>Brand</TableCell>
+              <TableCell>Serial No.</TableCell>
+              <TableCell>QTY</TableCell>
+              <TableCell>Processor</TableCell>
+              <TableCell>RAM</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {!loading && laptops.length === 0 && (
+              <TableRow>
+                <TableCell colSpan={7} align="center">No laptops found.</TableCell>
+              </TableRow>
+            )}
+            {laptops.map((laptop) => (
+              <TableRow key={laptop.Prebuilt_Laptops_ID}>
+                <TableCell>{laptop.Model}</TableCell>
+                <TableCell>{laptop.Brand}</TableCell>
+                <TableCell>{laptop.SERIAL_NO}</TableCell>
+                <TableCell>{laptop.QTY}</TableCell>
+                <TableCell>{laptop.Processor}</TableCell>
+                <TableCell>{laptop.RAM}</TableCell>
+                <TableCell>
+                  <Button size="small" variant="outlined" onClick={() => handleOpenDialog(laptop)} sx={{ mr: 1 }}>
+                    Edit
+                  </Button>
+                  <Button size="small" variant="outlined" color="error" onClick={() => handleDelete(laptop.Prebuilt_Laptops_ID)}>
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Dialog for Add/Edit */}
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogTitle>{editingLaptop ? "Edit Laptop" : "Add New Laptop"}</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ mt: 1 }}>
+            {/* Add inputs for key fields */}
+            <Grid item xs={6}>
+              <TextField
+                label="Model"
+                name="Model"
+                value={formData.Model}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <TextField
+                label="Brand"
+                name="Brand"
+                value={formData.Brand}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Serial No."
+                name="SERIAL_NO"
+                value={formData.SERIAL_NO}
+                onChange={handleChange}
+                fullWidth
+                required
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="QTY"
+                name="QTY"
+                type="number"
+                value={formData.QTY}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Processor"
+                name="Processor"
+                value={formData.Processor}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="RAM"
+                name="RAM"
+                value={formData.RAM}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Hard Drive"
+                name="Hard_Drive"
+                value={formData.Hard_Drive}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Operating System"
+                name="OS"
+                value={formData.OS}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Screen Size"
+                name="Screen_Size"
+                value={formData.Screen_Size}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Resolution"
+                name="Resolution"
+                value={formData.Resolution}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Built By"
+                name="Built_By"
+                value={formData.Built_By}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Install By"
+                name="Install_By"
+                value={formData.Install_By}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Item Type"
+                name="Item_Type"
+                value={formData.Item_Type}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Location"
+                name="Location_"
+                value={formData.Location_}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+
+            <Grid item xs={6}>
+              <TextField
+                label="Prebuilt ID"
+                name="Prebuilt_ID"
+                type="number"
+                value={formData.Prebuilt_ID}
+                onChange={handleChange}
+                fullWidth
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            {editingLaptop ? "Update" : "Add"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Paper>
+  );
+};
+
+export default PrebuiltLaptops;

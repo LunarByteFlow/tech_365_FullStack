@@ -7,7 +7,12 @@ import DisplayOrders from "../Guest/pages/DisplayOrders";
 import DisplayInventoryCheck from "../Guest/pages/DisplayInventoryCheck";
 import DisplayInventoryOrder from "../Guest/pages/DisplayInventoryOrder";
 import UpdateOrderForm from "../Guest/pages/UpdateOrderForm";
-export default function User() {
+import InventoryLaptop from "./components/InventoryLaptop";
+import InventoryDesktops from "./components/InventoryDesktops";
+import InventoryAO from "./components/InventoryAO";
+import InventoryParts from "./components/InventoryParts";
+
+export default function Inventory() {
   return (
     <>
       <Routes>
@@ -18,8 +23,11 @@ export default function User() {
         <Route path="Get_Orders" element={<DisplayOrders />} />
         <Route path="Get_Inventory_Check" element={<DisplayInventoryCheck />} />
         <Route path="Get_Inventory_Order" element={<DisplayInventoryOrder />} />
-        <Route path="update_order" element={<UpdateOrderForm />} />
-        <Route path="AddOrder" element={<AddNewOrder />} />
+        <Route path="Inventory_Laptops" element={<InventoryLaptop />} />
+        <Route path="Inventory_Desktops" element={<InventoryDesktops />} />
+        <Route path="Inventory_AO" element={<InventoryAO />} />
+        <Route path="Inventory_Parts" element={<InventoryParts />} />
+
       </Routes>
       
     </>

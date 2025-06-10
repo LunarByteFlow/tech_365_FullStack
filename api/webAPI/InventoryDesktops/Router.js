@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const desktopInventoryController = require("./inventoryDesktopsController"); // Path to your new controller file
+const desktopInventoryController = require("./Controller"); // Path to your new controller file
 
 // Destructure the functions from the controller
 const {

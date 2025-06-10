@@ -1,4 +1,5 @@
-const { connectDB } = require("../SSMS_DB"); // Adjust path as necessary to your DB connection
+// Adjust path as necessary to your DB connection
+const {connectDB} = require("../../SSMS_DB")
 const sql = require("mssql");
 
 // --- CREATE Laptop Inventory ---

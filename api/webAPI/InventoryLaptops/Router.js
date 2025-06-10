@@ -9,7 +9,6 @@ const {Create_LaptopInventory,
 router.post("/Create_LaptopInventory", Create_LaptopInventory);
 router.get("/Get_AllLaptopInventory", Get_AllLaptopInventory);
 router.get("/Get_LaptopInventoryById/:id", Get_LaptopInventoryById);
-
 router.put("/Update_LaptopInventory/:id", Update_LaptopInventory);
 router.delete("/Delete_LaptopInventory/:id", Delete_LaptopInventory);
 
