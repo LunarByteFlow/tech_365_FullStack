@@ -1,10 +1,10 @@
 import React from "react";
 import { Container, Typography, Box, Paper } from "@mui/material";
-import UserNavbar from "./UserNavbar";
+import TechnicianNavbar from "./TechnicianNavbar";
 const UserHome = () => {
   return (
     <>
-      <UserNavbar />
+      <TechnicianNavbar />
       <Container maxWidth="md" sx={{ mt: 8 }}>
         <Paper elevation={3} sx={{ padding: 4, borderRadius: 4 }}>
           <Box textAlign="center">

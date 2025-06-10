@@ -26,7 +26,7 @@ const DisplayOrders = () => {
     const fetchOrders = async () => {
       try {
         const res = await axios.get(
-          `https://tech-365-full-stack.vercel.app/api/Get_Orders`,
+          `http://localhost:8000/api/Get_Orders`,
           {
             headers: {
               Accept: "application/json",

@@ -11,7 +11,6 @@ import {
 import Guest from "./Guest";
 import Admin from "./Admin";
 import Technician from "./Technician";
-import Inventory from "./Inventory";
 import ProductFinish from "./ProductFinish";
 
 
@@ -27,7 +26,7 @@ const ComponentByRole = {
   admin: Admin,
   inventory: Inventory,
   Technician: Technician,
-  Inventory: Inventory,
+  productfinish: ProductFinish,
 };
 
 //ab hum function bana rahy iska format hota ha const naamOfFunction = (parameters jo isky hoty) => {yahan jo bhi wo kr k return krta}

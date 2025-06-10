@@ -137,12 +137,12 @@ const Login = async (req, res) => {
     console.log("JWT object:", jwt);  // Add this line to check if jwt is correctly imported
 
     // Generate JWT token
-    const authToken = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const authToken = jwt.sign(userData, JWT_SECRET, { expiresIn: "1h" });
 
     // Send the token in a cookie (Secure in production environment)
     res.cookie("authToken", authToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",  // Secure cookies in production
+      secure: true,  // Secure cookies in production
       sameSite: "lax",  // Helps prevent cross-site request forgery
       maxAge: 3600000,  // Cookie expiration time (1 hour)
     });

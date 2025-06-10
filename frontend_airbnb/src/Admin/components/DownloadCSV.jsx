@@ -29,7 +29,7 @@ function DownloadCSV() {
   };
 
   useEffect(() => {
-    fetch("https://tech-365-full-stack.vercel.app/api/Get_Orders")
+    fetch("http://localhost:8000/api/Get_Orders")
       .then((res) => res.json())
       .then((result) => {
         const orders = result.data;

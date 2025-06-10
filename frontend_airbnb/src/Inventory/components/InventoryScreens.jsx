@@ -10,7 +10,7 @@ const InventoryScreen = () => {
 
   const fetchScreens = async () => {
     try {
-      const res = await axios.get('/api/screens'); // Adjust URL if needed
+      const res = await axios.get('http://localhost:8000/api/screens'); // Adjust URL if needed
       setScreens(res.data.data);
     } catch (error) {
       console.error('Error fetching screens:', error);

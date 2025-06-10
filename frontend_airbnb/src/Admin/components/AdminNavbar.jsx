@@ -15,7 +15,6 @@ import {
 import MenuIcon from "@material-ui/icons/Menu";
 import { logincontext } from "../../GlobalContext/context";
 import Swal from "sweetalert2";
-import "../../User/components/defaultStyles.css";
 import Cookies from "js-cookie";
 
 const useStyles = makeStyles((theme) => ({
