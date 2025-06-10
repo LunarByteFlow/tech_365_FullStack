@@ -2,10 +2,10 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Button, Typography
+  Paper, Typography
 } from '@mui/material';
 
-const InventoryLaptop = ({ onEdit }) => {
+const InventoryLaptop = () => {
   const [laptops, setLaptops] = useState([]);
 
   const fetchLaptops = async () => {
@@ -13,16 +13,7 @@ const InventoryLaptop = ({ onEdit }) => {
       const res = await axios.get('/api/laptops'); // Adjust URL if needed
       setLaptops(res.data.data);
     } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/api/laptops/${id}`);
-      fetchLaptops(); // Refresh list
-    } catch (error) {
-      console.error(error);
+      console.error('Error fetching laptops:', error);
     }
   };
 
@@ -33,7 +24,6 @@ const InventoryLaptop = ({ onEdit }) => {
   return (
     <Paper sx={{ padding: 2 }}>
       <Typography variant="h5" gutterBottom>Laptop Inventory</Typography>
-      <Button variant="contained" onClick={() => onEdit(null)} sx={{ mb: 2 }}>Add New Laptop</Button>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -42,7 +32,6 @@ const InventoryLaptop = ({ onEdit }) => {
               <TableCell>Model</TableCell>
               <TableCell>Processor</TableCell>
               <TableCell>RAM</TableCell>
-              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -52,24 +41,6 @@ const InventoryLaptop = ({ onEdit }) => {
                 <TableCell>{laptop.Model}</TableCell>
                 <TableCell>{laptop.Processor}</TableCell>
                 <TableCell>{laptop.RAM}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => onEdit(laptop)}
-                    sx={{ mr: 1 }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="error"
-                    onClick={() => handleDelete(laptop.Inventory_Laptops_ID)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>

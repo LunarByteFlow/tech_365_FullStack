@@ -2,27 +2,18 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Button, Typography
+  Paper, Typography
 } from '@mui/material';
 
-const InventoryParts = ({ onEdit }) => {
+const InventoryParts = () => {
   const [parts, setParts] = useState([]);
 
   const fetchParts = async () => {
     try {
-      const res = await axios.get('/api/parts'); // Adjust URL
+      const res = await axios.get('/api/parts'); // Adjust URL if needed
       setParts(res.data.data);
     } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/api/parts/${id}`);
-      fetchParts();
-    } catch (error) {
-      console.error(error);
+      console.error('Error fetching parts:', error);
     }
   };
 
@@ -33,9 +24,6 @@ const InventoryParts = ({ onEdit }) => {
   return (
     <Paper sx={{ padding: 2 }}>
       <Typography variant="h5" gutterBottom>Part Inventory</Typography>
-      <Button variant="contained" onClick={() => onEdit(null)} sx={{ mb: 2 }}>
-        Add New Part
-      </Button>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
@@ -44,7 +32,6 @@ const InventoryParts = ({ onEdit }) => {
               <TableCell>Model</TableCell>
               <TableCell>Type</TableCell>
               <TableCell>Qty On Hand</TableCell>
-              <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -54,24 +41,6 @@ const InventoryParts = ({ onEdit }) => {
                 <TableCell>{part.Model}</TableCell>
                 <TableCell>{part.Type_}</TableCell>
                 <TableCell>{part.QTY_On_Hand}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    onClick={() => onEdit(part)}
-                    sx={{ mr: 1 }}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    color="error"
-                    onClick={() => handleDelete(part.Inventory_Parts_ID)}
-                  >
-                    Delete
-                  </Button>
-                </TableCell>
               </TableRow>
             ))}
           </TableBody>

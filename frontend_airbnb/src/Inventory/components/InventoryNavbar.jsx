@@ -120,7 +120,7 @@ const InventoryNavbar = () => {
             variant="h5"
             className={classes.title}
             component={Link}
-            to="user"
+            to="inventory"
           >
             tech_365
           </Typography>

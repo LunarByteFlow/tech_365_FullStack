@@ -1,7 +1,7 @@
 //import routing
 import { Route, Routes } from "react-router-dom";
 import AddNewOrder from "../Guest/pages/AddNewOrder";
-import UserHome from "./components/UserHome";
+import ProductFinishHome from "./components/ProductFinishHome";
 import DisplayDispatch from "../Guest/pages/DisplayDispatch";
 import DisplayOrders from "../Guest/pages/DisplayOrders";
 import DisplayInventoryCheck from "../Guest/pages/DisplayInventoryCheck";
@@ -11,9 +11,9 @@ export default function User() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<UserHome />} />
-        <Route path="*" element={<UserHome />} />
-        <Route path="user" element={<UserHome />} />
+        <Route path="/" element={<ProductFinishHome />} />
+        <Route path="*" element={<ProductFinishHome />} />
+        <Route path="user" element={<ProductFinishHome />} />
         <Route path="Get_Dispatch" element={<DisplayDispatch />} />
         <Route path="Get_Orders" element={<DisplayOrders />} />
         <Route path="Get_Inventory_Check" element={<DisplayInventoryCheck />} />
