@@ -13,7 +13,6 @@ const orderRouter = require("./webAPI/Order/Router.js");
 const DispatchRouter = require("./webAPI/Dispatch/Router.js");
 const Inventory_Order_Router = require("./webAPI/Inventory&Order/Router.js");
 const Inventory_Order_Check_Router = require("./webAPI/Inventory-Check/Router.js");
-
 const Returns_Router = require("./webAPI/Returns/Router.js");
 const InventoryAO = require("./webAPI/InventoryAO/Router.js");
 const InventoryDesktops = require("./webAPI/InventoryDesktops/Router.js");
@@ -23,6 +22,9 @@ const InventoryParts = require("./webAPI/InventoryParts/Router.js");
 const UserRouter = require("./webAPI/User/Router.js");
 const PrebuiltLaptops = require("./webAPI/Prebuilt_Laptops/Router.js");
 const PrebuiltDesktops = require("./webAPI/Prebuilt_Desktops/Router.js");
+const UploadInventoryCSVRouter = require("./webAPI/InventoryCSV/Router.js");
+const ProductFinish = require("./webAPI/ProductFinish/Router.js");
+
 
 
 
@@ -64,7 +66,8 @@ app.use("/api",InventoryScreens);
 app.use("/api",InventoryParts);
 app.use("/api",PrebuiltLaptops);
 app.use("/api",PrebuiltDesktops);
-
+app.use("/api",UploadInventoryCSVRouter);
+app.use("/api",ProductFinish);
 
 // Initialize Database Connection (CRITICAL FOR VERCEL DEPLOYMENT)
 let dbPool; // Declare a variable to hold the connection pool

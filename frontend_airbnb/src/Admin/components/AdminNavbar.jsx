@@ -89,7 +89,11 @@ const AdminNavbar = () => {
       Cookies.remove("ROLE");
       dispatch({ type: "LOGOUT" });
 
-      Swal.fire("Logged out", "You have been logged out successfully.", "success");
+      Swal.fire(
+        "Logged out",
+        "You have been logged out successfully.",
+        "success"
+      );
       navigate("/login");
     }
   };
@@ -99,12 +103,15 @@ const AdminNavbar = () => {
     { text: "Add New Product", to: "postAnOrder" },
     { text: "Dispatch", to: "Get_Dispatch" },
     { text: "Orders", to: "Get_Orders" },
-    { text: "Inventory Order", to: "Get_Inventory_Order" },
-    { text: "Inventory Check", to: "Get_Inventory_Check" },
-    { text: "Add Order", to: "AddOrder" },
-    { text: "Update orderrrrr", to: "update_order" },
+    { text: "Laptop Inventorry", to: "prebuilt_laptops" },
+    { text: "Desktop Inventory", to: "prebuilt_desktops" },
+    { text: "Parts Inventory", to: "prebuilt_parts" },
+    { text: "Screens Inventory", to: "prebuilt_screens" },
+    { text: "AO Inventory", to: "inventory_AO" },
     { text: "Stock", to: "low-stock" },
     { text: "Download Monthly CSV reports", to: "download_csv" },
+    { text: "InventoryUploader", to: "InventoryUploader" },
+    { text: "CombinedOrders", to: "CombinedOrders" },
 
   ];
 

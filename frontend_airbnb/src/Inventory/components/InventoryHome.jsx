@@ -9,15 +9,15 @@ const InventoryHome = () => {
         <Paper elevation={3} sx={{ padding: 4, borderRadius: 4 }}>
           <Box textAlign="center">
             <Typography variant="h4" gutterBottom>
-              Welcome to the User Panel
+              Welcome to the Inventory Panel
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              You are currently viewing the User page as a Admin.
+              You are currently viewing the Inventory page as a Inventory.
             </Typography>
             <Box mt={4}>
               {[...Array(5)].map((_, i) => (
                 <Typography variant="h6" key={i} gutterBottom>
-                  This is the Home page of the User Panel
+                  This is the Home page of the Inventory Panel
                 </Typography>
               ))}
             </Box>

@@ -7,6 +7,7 @@ import DisplayOrders from "../Guest/pages/DisplayOrders";
 import DisplayInventoryCheck from "../Guest/pages/DisplayInventoryCheck";
 import DisplayInventoryOrder from "../Guest/pages/DisplayInventoryOrder";
 import UpdateOrderForm from "../Guest/pages/UpdateOrderForm";
+import FiveFields from "./components/FiveFields";
 export default function ProductFinish() {
   return (
     <>
@@ -20,8 +21,8 @@ export default function ProductFinish() {
         <Route path="Get_Inventory_Order" element={<DisplayInventoryOrder />} />
         <Route path="update_order" element={<UpdateOrderForm />} />
         <Route path="AddOrder" element={<AddNewOrder />} />
+        <Route path="Get5ProductFinishesFields" element={<FiveFields />} />
       </Routes>
-      
     </>
   );
 }

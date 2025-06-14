@@ -36,7 +36,7 @@ function DownloadCSV() {
         const groups = {};
 
         orders.forEach((order) => {
-          const dateStr = order.Disp_Date;
+          const dateStr = order.DispatchDate;
           const monthAbbr = dateStr?.split("-")[1]?.toLowerCase();
           if (!monthAbbr) return;
 

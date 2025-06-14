@@ -12,12 +12,12 @@ const UserHome = () => {
               Welcome to the User Panel
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              You are currently viewing the User page as a Admin.
+              You are currently viewing the Technician page as a Technician.
             </Typography>
             <Box mt={4}>
               {[...Array(5)].map((_, i) => (
                 <Typography variant="h6" key={i} gutterBottom>
-                  This is the Home page of the User Panel
+                  This is the Home page of the Technician Panel
                 </Typography>
               ))}
             </Box>

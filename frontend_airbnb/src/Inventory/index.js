@@ -11,7 +11,8 @@ import InventoryLaptop from "./components/InventoryLaptop";
 import InventoryDesktops from "./components/InventoryDesktops";
 import InventoryAO from "./components/InventoryAO";
 import InventoryParts from "./components/InventoryParts";
-
+import LaptopPrebuilt from "./components/LaptopPrebuilt";
+import DesktopPrebuilt from "./components/DesktopPrebuilt";
 export default function Inventory() {
   return (
     <>
@@ -27,6 +28,8 @@ export default function Inventory() {
         <Route path="Inventory_Desktops" element={<InventoryDesktops />} />
         <Route path="Inventory_AO" element={<InventoryAO />} />
         <Route path="Inventory_Parts" element={<InventoryParts />} />
+        <Route path="Laptop Prebuilt" element={<LaptopPrebuilt />} />
+        <Route path="Desktop Prebuilt" element={<DesktopPrebuilt />} />
 
       </Routes>
       

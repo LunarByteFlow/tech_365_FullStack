@@ -15,7 +15,9 @@ import InventoryLaptop from "./components/InventoryLaptop.jsx";
 import InventoryDesktops from "../Inventory/components/InventoryDesktops.jsx";
 import InventoryParts from "./components/InventoryParts.jsx";
 import InventoryAO from "../Inventory/components/InventoryAO.jsx";
-import OrderReturns from "./components/OrderReturns.jsx"
+import OrderReturns from "./components/OrderReturns.jsx";
+import InventoryUploader from "./components/InventoryUploader.jsx";
+import CombinedOrders from "./components/CombinedOrders.jsx";
 export default function Admin() {
   return (
     <>
@@ -36,7 +38,8 @@ export default function Admin() {
       <Route path="inventory_desktops" element={<InventoryDesktops />} />
       <Route path="inventory_AO" element={<InventoryAO />} />
       <Route path="inventory_parts" element={<InventoryParts />} />
-
+      <Route path="InventoryUploader" element={<InventoryUploader />} />
+      <Route path="CombinedOrders" element={<CombinedOrders />} />
     </Routes>
     </>
   );

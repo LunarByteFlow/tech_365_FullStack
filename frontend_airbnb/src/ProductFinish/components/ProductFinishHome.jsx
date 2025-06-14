@@ -9,7 +9,7 @@ const ProductFinishHome = () => {
         <Paper elevation={3} sx={{ padding: 4, borderRadius: 4 }}>
           <Box textAlign="center">
             <Typography variant="h4" gutterBottom>
-              Welcome to the User Panel
+              Welcome to the Product Finish Panel
             </Typography>
             <Typography variant="body1" color="text.secondary">
               You are currently viewing the Product Finish.

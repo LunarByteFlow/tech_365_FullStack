@@ -235,8 +235,42 @@ const Get_Orders = async (req, res) => {
   }
 };
 
+const Get_CombinedOrders = async (req, res) => {
+  try {
+    await connectDB();
+
+    const request = new sql.Request();
+
+    const query = `
+      SELECT
+        os.[OrderNo] AS [Order No],
+        os.QTY,
+        os.Model,
+        os.Brand,
+        os.Dispatched,
+        os.Courier,
+        pf.ProductFinish
+      FROM [OrderSheet] os
+      LEFT JOIN [ProductFinish] pf ON os.[OrderNo] = pf.[OrderNo]
+    `;
+
+    const result = await request.query(query);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ success: false, message: "No records found." });
+    }
+
+    res.status(200).json({ success: true, data: result.recordset });
+  } catch (error) {
+    console.error("Error fetching combined orders:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+
 module.exports = {
   postAnOrder,
   Update_Order,
   Get_Orders,
+  Get_CombinedOrders
 };

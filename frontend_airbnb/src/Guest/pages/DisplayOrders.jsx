@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   Box,
@@ -17,26 +17,36 @@ const DisplayOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  const BASE_URL = "http://localhost:8000/api";
 
-  // Simplified displayValue function
+  const getCourierColor = (courier) => {
+    if (!courier) return "gray";
+    switch (courier.toUpperCase()) {
+      case "DHL":
+        return "lightgreen";
+      case "RM":
+      case "ROYAL MAIL":
+        return "lightyellow";
+      case "DPD":
+        return "lightcoral"; // light red
+      default:
+        return "lightgray";
+    }
+  };
+
   const displayValue = (value) => value || "Not Available";
 
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8000/api/Get_Orders`,
-          {
-            headers: {
-              Accept: "application/json",
-            },
-          }
-        );
+        const res = await axios.get(`${BASE_URL}/Get_Orders`, {
+          headers: {
+            Accept: "application/json",
+          },
+        });
         console.log("API Status Code:", res.status);
         console.log("API Response:", res.data);
 
-        // Ensure we set an array even if data structure changes
         const fetchedOrders = Array.isArray(res.data?.data)
           ? res.data.data
           : Array.isArray(res.data)
@@ -94,28 +104,47 @@ const DisplayOrders = () => {
               <Paper elevation={1} sx={{ p: 2 }}>
                 <Grid container spacing={2}>
                   {[
-                    ["PKD_By", order.PKD_By],
-                    ["Built_By", order.Built_By],
-                    ["INS_By", order.INS_By],
+                    ["PackedBy", order.PackedBy],
+                    ["BuiltBy", order.BuiltBy],
+                    ["InstallBy", order.InstallBy],
+                    ["ItemType", order.ItemType],
+                    ["OrderNo", order.OrderNo],
+                    ["QTY", order.QTY],
                     ["Model", order.Model],
                     ["Brand", order.Brand],
                     ["SERIAL No", order.SERIAL_No],
-                    ["Description", order.Description],
-                    ["Hard Drive", order.Hard_Drive],
-                    ["Ram", order.Ram],
+                    ["Processor", order.Processor],
+                    ["RAM", order.RAM],
+                    ["Hard Drive", order.HardDrive],
                     ["OS", order.OS],
                     ["Cable", order.Cable],
-                    ["KB & Mice", order.KB_Mice],
-                    ["Prime", order.Prime],
+                    ["Comment", order.Comment],
+                    [
+                      "Courier",
+                      <span
+                        style={{
+                          backgroundColor: getCourierColor(order.Courier),
+                          color: "black",
+                          padding: "2px 8px",
+                          borderRadius: "4px",
+                          display: "inline-block",
+                          minWidth: "50px",
+                          textAlign: "center",
+                        }}
+                        key="courier-color"
+                      >
+                        {displayValue(order.Courier)}
+                      </span>,
+                    ],
                     ["Dispatched", order.Dispatched],
-                    ["Labels", order.Labels],
-                    ["Post Code", order.Post_Code],
-                    ["Dispatch Date", order.Disp_Date],
-                    ["MU", order.MU],
+                    ["OrderID", order.OrderID],
+                    ["PostCode", order.PostCode],
+                    ["Dispatch Date", order.DispatchDate],
+                    ["Prebuilt Or Inventory", order.Prebuilt_Or_Inventory],
                   ].map(([label, value], i) => (
                     <Grid item xs={12} sm={6} md={4} key={i}>
                       <Typography variant="body2">
-                        <strong>{label}:</strong> {displayValue(value)}
+                        <strong>{label}:</strong> {value}
                       </Typography>
                     </Grid>
                   ))}

@@ -103,6 +103,7 @@ const ProductFinishNavbar = () => {
     { text: "Inventory Check", to: "Get_Inventory_Check" },
     { text: "Add Order", to: "AddOrder" },
     { text: "Update orderrrrr", to: "update_order" },
+    { text: "5 fields", to: "Get5ProductFinishesFields" },
   ];
 
   const authLinks = [{ text: "Logout", onClick: handleLogout }];
