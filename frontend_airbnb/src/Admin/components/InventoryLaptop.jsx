@@ -23,12 +23,13 @@ const InventoryLaptop = () => {
     QTY_Recieved: '',
     QTY_On_Hand: ''
   });
+  const BASE_URL= "http://10.2.0.2:8000/api";
 
   const generateID = () => 'LAP-' + Date.now();
 
   const fetchLaptops = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/Get_AllLaptopInventory');
+      const res = await axios.get(`${BASE_URL}/Get_AllLaptopInventory`);
       setLaptops(res.data.data || []);
     } catch (error) {
       console.error(error);

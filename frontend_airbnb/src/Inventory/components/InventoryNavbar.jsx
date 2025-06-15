@@ -95,14 +95,13 @@ const InventoryNavbar = () => {
   };
 
   const navLinks = [
-    
-    { text: "Add New Product", to: "postAnOrder" },
     { text: "Dispatch", to: "Get_Dispatch" },
     { text: "Orders", to: "Get_Orders" },
-    { text: "Inventory Order", to: "Get_Inventory_Order" },
-    { text: "Inventory Check", to: "Get_Inventory_Check" },
-    { text: "Add Order", to: "AddOrder" },
-    { text: "Update orderrrrr", to: "update_order" },
+    { text: "Inventory_Laptops", to: "Inventory_Laptops" },
+    { text: "Inventory_Desktops", to: "Inventory_Desktops" },
+    { text: "Inventory_AO", to: "Inventory_AO" },
+    { text: "Inventory_Screens", to: "Inventory_Screens" },
+    { text: "Inventory_Parts", to: "Inventory_Parts" },
   ];
 
   const authLinks = [{ text: "Logout", onClick: handleLogout }];

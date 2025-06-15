@@ -17,7 +17,8 @@ const DisplayOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const BASE_URL = "http://localhost:8000/api";
+  // const BASE_URL = "http://localhost:8000/api";
+  const BASE_URL= "http://10.2.0.2:8000/api";
 
   const getCourierColor = (courier) => {
     if (!courier) return "gray";

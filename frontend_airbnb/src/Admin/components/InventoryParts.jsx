@@ -4,7 +4,8 @@ import {
   TextField, Button, Paper, Typography, Stack
 } from '@mui/material';
 
-const BASE_URL = "http://localhost:8000/api";
+// const BASE_URL = "http://localhost:8000/api";
+const BASE_URL= "http://10.2.0.2:8000/api";
 
 const InventoryParts = ({ editingPart, onCancel, onSuccess }) => {
   const initialForm = {

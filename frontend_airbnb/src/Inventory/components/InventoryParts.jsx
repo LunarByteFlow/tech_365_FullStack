@@ -4,7 +4,8 @@ import {
   Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
   Paper, Typography
 } from '@mui/material';
-const BASE_URL= "http://localhost:8000/api"
+// const BASE_URL= "http://localhost:8000/api";
+const BASE_URL= "http://10.2.0.2:8000/api";
 const InventoryParts = () => {
   const [parts, setParts] = useState([]);
 

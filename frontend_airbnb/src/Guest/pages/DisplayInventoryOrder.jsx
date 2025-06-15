@@ -17,14 +17,15 @@ const DisplayInventoryOrder = () => {
   const [inventoryData, setInventoryData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  // const BASE_URL = "http://localhost:8000/api";
+  const BASE_URL= "http://10.2.0.2:8000/api";
 
   const displayValue = (val) => (val !== undefined && val !== null && val !== '' ? val : 'Not Available');
 
   useEffect(() => {
     const fetchInventoryData = async () => {
       try {
-        const response = await axios.get(`https://tech-365-full-stack.vercel.app/api/Get_Inventory_Order`);
+        const response = await axios.get(`${BASE_URL}/Get_Inventory_Order`);
         setInventoryData(response.data.data); // 👈 Adjust based on your actual response structure
       } catch (error) {
         setError('Error fetching inventory order data');

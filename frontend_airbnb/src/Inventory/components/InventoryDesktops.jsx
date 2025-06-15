@@ -5,7 +5,7 @@ const InventoryDesktops = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
-
+const BASE_URL = "http://localhost:8000/api";
   // Fetch all inventory records on component mount
   useEffect(() => {
     fetchInventory();
@@ -16,7 +16,7 @@ const InventoryDesktops = () => {
     setError(null);
     setMessage(null);
     try {
-      const res = await fetch("http://localhost:8000/api/Get_AllDesktopInventory");
+      const res = await fetch(`${BASE_URL}/Get_AllDesktopInventory`);
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.message || 'Failed to fetch inventory.');

@@ -19,7 +19,7 @@ const InventoryAO = () => {
     "QTY_Recieved",
     "QTY_On_Hand",
   ];
-
+  BASE_URL = "http://localhost:8000/api";
   // Fetch inventory on mount
   useEffect(() => {
     fetchInventory();
@@ -29,7 +29,7 @@ const InventoryAO = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`http://localhost:8000/api/Get_Inventory`);
+      const res = await fetch(`${BASE_URL}/api/Get_Inventory`);
       if (!res.ok) throw new Error("Failed to fetch inventory");
       const data = await res.json();
       if (data.success) {

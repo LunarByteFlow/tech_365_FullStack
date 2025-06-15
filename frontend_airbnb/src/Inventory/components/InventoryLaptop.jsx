@@ -1,19 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Typography
-} from '@mui/material';
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from "@mui/material";
 
 const InventoryLaptop = () => {
   const [laptops, setLaptops] = useState([]);
+  // const BASE_URL = "http://localhost:8000/api";
+  const BASE_URL= "http://10.2.0.2:8000/api";
 
   const fetchLaptops = async () => {
     try {
-      const res = await axios.get('/api/laptops'); // Adjust URL if needed
+      const res = await axios.get(`${BASE_URL}/Get_AllLaptopInventory`); // Adjust URL if needed
       setLaptops(res.data.data);
     } catch (error) {
-      console.error('Error fetching laptops:', error);
+      console.error("Error fetching laptops:", error);
     }
   };
 
@@ -23,7 +31,9 @@ const InventoryLaptop = () => {
 
   return (
     <Paper sx={{ padding: 2 }}>
-      <Typography variant="h5" gutterBottom>Laptop Inventory</Typography>
+      <Typography variant="h5" gutterBottom>
+        Laptop Inventory
+      </Typography>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

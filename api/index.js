@@ -25,18 +25,15 @@ const PrebuiltDesktops = require("./webAPI/Prebuilt_Desktops/Router.js");
 const UploadInventoryCSVRouter = require("./webAPI/InventoryCSV/Router.js");
 const ProductFinish = require("./webAPI/ProductFinish/Router.js");
 
-
-
-
-
 // app.use(bodyParser.json());
 app.use(express.json());
-
+// app.use(cors());
 const allowedOrigins = [
   "https://tech-365-full-stack.vercel.app/", // Your deployed frontend URL
   "http://localhost:3000", // Your local React development server URL
+  "http://10.2.0.2",
   "http://localhost:5173", // Common for Vite React apps // Replace with your actual frontend URL
-  // Add other allowed origins if needed (e.g., preview deployments)
+  //   // Add other allowed origins if needed (e.g., preview deployments)
 ];
 app.use(
   cors({
@@ -59,15 +56,15 @@ app.use("/api", Inventory_Order_Router);
 app.use("/api", Inventory_Order_Check_Router);
 app.use("/api", Returns_Router);
 app.use("/api", UserRouter);
-app.use("/api",InventoryAO);
-app.use("/api",InventoryDesktops);
-app.use("/api",InventoryLaptops);
-app.use("/api",InventoryScreens);
-app.use("/api",InventoryParts);
-app.use("/api",PrebuiltLaptops);
-app.use("/api",PrebuiltDesktops);
-app.use("/api",UploadInventoryCSVRouter);
-app.use("/api",ProductFinish);
+app.use("/api", InventoryAO);
+app.use("/api", InventoryDesktops);
+app.use("/api", InventoryLaptops);
+app.use("/api", InventoryScreens);
+app.use("/api", InventoryParts);
+app.use("/api", PrebuiltLaptops);
+app.use("/api", PrebuiltDesktops);
+app.use("/api", UploadInventoryCSVRouter);
+app.use("/api", ProductFinish);
 
 // Initialize Database Connection (CRITICAL FOR VERCEL DEPLOYMENT)
 let dbPool; // Declare a variable to hold the connection pool
@@ -92,7 +89,7 @@ initializeDbConnection();
 // Start server
 if (require.main === module) {
   const PORT = process.env.PORT || 8000;
-  app.listen(PORT, () => {
-    console.log(`Server running locally on port ${PORT}`);
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server running and listening on port ${PORT}`);
   });
 }

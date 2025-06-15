@@ -147,7 +147,7 @@ const RegisterUser = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("technician"); // default role or empty string
-
+const BASE_URL= "http://10.2.0.2:8000/api";
   const navigate = useNavigate();
 
   const handleSignUpSubmit = async (e) => {
@@ -160,7 +160,7 @@ const RegisterUser = () => {
     };
 
     try {
-      const response = await axios.post(`https://localhost:8000/api/createUser`, payload);
+      const response = await axios.post(`${BASE_URL}/createUser`, payload);
       
       Swal.fire({
         title: "Account Created",

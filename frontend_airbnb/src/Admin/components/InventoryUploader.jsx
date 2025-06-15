@@ -4,7 +4,8 @@ import axios from "axios";
 const InventoryUploader = () => {
   const [file, setFile] = useState(null);
   const [status, setStatus] = useState("");
-
+// BASE_URL= "http://localhost:8000/api";
+const BASE_URL= "http://10.2.0.2:8000/api";
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -20,7 +21,7 @@ const InventoryUploader = () => {
 
     try {
       setStatus("Uploading...");
-      const response = await axios.post("http://localhost:8000/api/UploadInventoryCSV", formData, {
+      const response = await axios.post(`${BASE_URL}/UploadInventoryCSV`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },

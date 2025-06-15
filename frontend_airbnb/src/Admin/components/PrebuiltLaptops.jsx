@@ -6,7 +6,8 @@ import {
   DialogActions, TextField, Grid
 } from "@mui/material";
 
-const BASE_URL = "http://localhost:8000/api";
+// const BASE_URL = "http://localhost:8000/api";
+const BASE_URL= "http://10.2.0.2:8000/api";
 
 const emptyLaptop = {
   Prebuilt_ID: "",

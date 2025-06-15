@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-const baseUrl = "https://localhost:8000/api";
+// const baseUrl = "https://localhost:8000/api";
+const BASE_URL= "http://10.2.0.2:8000/api";
 
 const InventoryAO = () => {
   const initialFormState = {
@@ -23,7 +24,7 @@ const InventoryAO = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
+const BASE_URL= "http://10.2.0.2:8000/api";
   // Fetch all inventory records on component mount
   useEffect(() => {
     fetchInventory();
@@ -33,7 +34,7 @@ const InventoryAO = () => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`http://localhost:8000/api/Get_Inventory`);
+      const res = await fetch(`${BASE_URL}/api/Get_Inventory`);
       if (!res.ok) throw new Error("Failed to fetch inventory");
       const data = await res.json();
       if (data.success) {
@@ -58,7 +59,7 @@ const InventoryAO = () => {
   const handleCreate = async () => {
     setError("");
     try {
-      const res = await fetch(`https://localhost:8000/api/Create_Inventory`, {
+      const res = await fetch(`${BASE_URL}/Create_Inventory`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -92,7 +93,7 @@ const InventoryAO = () => {
   const handleUpdate = async () => {
     setError("");
     try {
-      const res = await fetch(`https://localhost:8000/api/Update_Inventory`, {
+      const res = await fetch(`${BASE_URL}/Update_Inventory`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
@@ -115,7 +116,7 @@ const InventoryAO = () => {
 
     setError("");
     try {
-      const res = await fetch(`https://localhost:8000/api/Delete_Inventory/${id}`, {
+      const res = await fetch(`${BASE_URL}/Delete_Inventory/${id}`, {
         method: "DELETE",
       });
       const data = await res.json();

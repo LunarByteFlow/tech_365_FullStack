@@ -13,9 +13,9 @@ import {
 
 const LaptopPrebuilt = () => {
   const [returns, setReturns] = useState([]);
-
+const BASE_URL="http://10.2.0.2:8000/api";
   useEffect(() => {
-    fetch("http://localhost:8000/api/GetAllPrebuiltLaptops")
+    fetch(`${BASE_URL}/GetAllPrebuiltLaptops`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {

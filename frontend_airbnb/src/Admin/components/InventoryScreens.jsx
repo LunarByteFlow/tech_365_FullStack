@@ -7,10 +7,12 @@ import {
 
 const InventoryScreens = ({ onEdit }) => {
   const [screens, setScreens] = useState([]);
+  // BASE_URL = "http://localhost:8000/api";
+  const BASE_URL= "http://10.2.0.2:8000/api";
 
   const fetchScreens = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/Get_AllInventoryScreens'); // Adjust URL
+      const res = await axios.get(`${BASE_URL}/Get_AllInventoryScreens`); // Adjust URL
       setScreens(res.data.data);
     } catch (error) {
       console.error(error);
@@ -19,7 +21,7 @@ const InventoryScreens = ({ onEdit }) => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/api/Delete_InventoryScreen/${id}`);
+      await axios.delete(`${BASE_URL}/Delete_InventoryScreen/${id}`);
       fetchScreens();
     } catch (error) {
       console.error(error);

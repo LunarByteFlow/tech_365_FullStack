@@ -7,10 +7,11 @@ import {
 
 const InventoryScreen = () => {
   const [screens, setScreens] = useState([]);
-
+// const BASE_URL ="http://localhost:8000/api";
+const BASE_URL= "http://10.2.0.2:8000/api";
   const fetchScreens = async () => {
     try {
-      const res = await axios.get('http://localhost:8000/api/screens'); // Adjust URL if needed
+      const res = await axios.get(`${BASE_URL}/Get_AllInventoryScreens`); // Adjust URL if needed
       setScreens(res.data.data);
     } catch (error) {
       console.error('Error fetching screens:', error);

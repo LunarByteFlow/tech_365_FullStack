@@ -28,7 +28,7 @@ const InventoryDesktops = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null); // For success/info messages
-
+const BASE_URL= "http://10.2.0.2:8000/api";
   // Fetch all inventory records on component mount
   useEffect(() => {
     fetchInventory();
@@ -41,7 +41,7 @@ const InventoryDesktops = () => {
     setError(null);
     setMessage(null);
     try {
-      const res = await fetch("http://localhost:8000/api/Get_AllDesktopInventory");
+      const res = await fetch(`${BASE_URL}/Get_AllDesktopInventory`);
       if (!res.ok) {
         const errData = await res.json();
         throw new Error(errData.message || 'Failed to fetch inventory.');
@@ -70,7 +70,7 @@ const InventoryDesktops = () => {
           payload.Inventory_Desktops_ID = uuidv4();
       }
 
-      const res = await fetch("http://localhost:8000/api/Create_DesktopInventory", {
+      const res = await fetch(`${BASE_URL}/Create_DesktopInventory`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -115,7 +115,7 @@ const InventoryDesktops = () => {
     setError(null);
     setMessage(null);
     try {
-      const res = await fetch(`http://localhost:8000/api/Delete_DesktopInventory/:${id}`, {
+      const res = await fetch(`${BASE_URL}/Delete_DesktopInventory/:${id}`, {
         method: 'DELETE',
       });
       const data = await res.json();

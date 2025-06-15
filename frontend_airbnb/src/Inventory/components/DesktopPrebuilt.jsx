@@ -13,9 +13,9 @@ import {
 
 const DesktopPrebuilt = () => {
   const [returns, setReturns] = useState([]);
-
+const BASE_URL = "http://localhost:8000/api";
   useEffect(() => {
-    fetch("http://localhost:8000/api/GetAllPrebuiltDesktops")
+    fetch(`${BASE_URL}/GetAllPrebuiltDesktops`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success && Array.isArray(data.data)) {

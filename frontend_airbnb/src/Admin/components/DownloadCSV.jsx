@@ -27,9 +27,9 @@ function DownloadCSV() {
     Nov: "November",
     Dec: "December",
   };
-
+const BASE_URL= "http://10.2.0.2:8000/api";
   useEffect(() => {
-    fetch("http://localhost:8000/api/Get_Orders")
+    fetch(`${BASE_URL}/Get_Orders`)
       .then((res) => res.json())
       .then((result) => {
         const orders = result.data;
