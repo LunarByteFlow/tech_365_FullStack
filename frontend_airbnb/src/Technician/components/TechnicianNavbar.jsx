@@ -96,13 +96,10 @@ const TechnicianNavbar = () => {
 
   const navLinks = [
     
-    { text: "Add New Product", to: "postAnOrder" },
-    { text: "Dispatch", to: "Get_Dispatch" },
     { text: "Orders", to: "Get_Orders" },
-    { text: "Inventory Order", to: "Get_Inventory_Order" },
-    { text: "Inventory Check", to: "Get_Inventory_Check" },
-    { text: "Add Order", to: "AddOrder" },
-    { text: "Update orderrrrr", to: "update_order" },
+    { text: "Laptop Prebuilt", to: "laptop_prebuilt" },
+    { text: "Desktop Prebuilt", to: "desktop_prebuilt" },
+
   ];
 
   const authLinks = [{ text: "Logout", onClick: handleLogout }];

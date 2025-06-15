@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-// const API_BASE = "http://localhost:8000/api"; // Change to your backend URL
+// const BASE_URL = "http://localhost:8000/api"; // Change to your backend URL
 const BASE_URL= "http://10.2.0.2:8000/api";
 
 function ReturnsApp() {
@@ -27,7 +27,7 @@ function ReturnsApp() {
   const fetchReturns = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(API_BASE);
+      const res = await axios.get(BASE_URL);
       setReturns(res.data.data);
       setError("");
     } catch (err) {
@@ -50,7 +50,7 @@ function ReturnsApp() {
   const handleSelect = async (id) => {
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}/${id}`);
+      const res = await axios.get(`${BASE_URL}/${id}`);
       setSelectedReturn(res.data.data);
       setFormData(res.data.data);
       setIsEditing(true);
@@ -70,11 +70,11 @@ function ReturnsApp() {
     try {
       if (isEditing && selectedReturn) {
         // Update
-        await axios.put(`${API_BASE}/${selectedReturn.Order_Returns_ID}`, formData);
+        await axios.put(`${BASE_URL}/${selectedReturn.Order_Returns_ID}`, formData);
         alert("Return record updated successfully.");
       } else {
         // Create
-        await axios.post(API_BASE, formData);
+        await axios.post(BASE_URL, formData);
         alert("Return record created successfully.");
       }
       setFormData({
@@ -104,7 +104,7 @@ function ReturnsApp() {
     if (!window.confirm("Are you sure you want to delete this return record?")) return;
     setLoading(true);
     try {
-      await axios.delete(`${API_BASE}/${id}`);
+      await axios.delete(`${BASE_URL}/${id}`);
       alert("Return record deleted successfully.");
       if (selectedReturn?.Order_Returns_ID === id) {
         setSelectedReturn(null);

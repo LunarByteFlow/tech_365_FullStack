@@ -30,7 +30,7 @@ const createUser = async (req, res) => {
   const { name, email, password, role } = req.body;
 
   // Allowed roles for registration
-  const allowedRoles = ["admin", "technician",'Inventory', "productfinish"];
+  const allowedRoles = ["admin", "technician",'inventory', "product_finish"];
 
   // Validate required fields
   if (!name || !email || !password) {
@@ -67,7 +67,7 @@ const createUser = async (req, res) => {
     // Create JWT token with role
     const authToken = jwt.sign(
       { name, email, role },
-      process.env.JWT_SECRET,
+      JWT_SECRET,
       { expiresIn: "1h" }
     );
 
@@ -180,10 +180,71 @@ const Logout = async (req, res) => {
 //     res.cookie("token", "").json(true);
 //   });
 
+
+const updateUser = async (req, res) => {
+  const { id, name, email, password, role } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ message: "User ID is required" });
+  }
+
+  const allowedRoles = ["admin", "technician", "inventory", "product_finish"];
+  if (role && !allowedRoles.includes(role)) {
+    return res.status(400).json({ message: `Invalid role. Allowed roles: ${allowedRoles.join(", ")}` });
+  }
+
+  try {
+    await connectDB(); // Connect to SQL Server
+
+    const request = new sql.Request();
+
+    // Check if user exists
+    const existingUser = await request
+      .input("id", sql.Int, id)
+      .query("SELECT * FROM Users WHERE id = @id");
+
+    if (existingUser.recordset.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Prepare update fields
+    const updates = [];
+    if (name) updates.push(`name = @name`);
+    if (email) updates.push(`email = @email`);
+    if (role) updates.push(`role = @role`);
+    if (password) updates.push(`password = @password`);
+
+    if (updates.length === 0) {
+      return res.status(400).json({ message: "No fields to update" });
+    }
+
+    // Input values
+    if (name) request.input("name", sql.VarChar, name);
+    if (email) request.input("email", sql.VarChar, email);
+    if (role) request.input("role", sql.VarChar, role);
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      request.input("password", sql.VarChar, hashedPassword);
+    }
+
+    // Perform update
+    const updateQuery = `UPDATE Users SET ${updates.join(", ")} WHERE id = @id`;
+    await request.query(updateQuery);
+
+    res.status(200).json({ success: true, message: "User updated successfully" });
+
+  } catch (error) {
+    console.error("Update User Error:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
+
+
 module.exports = {
   createUser,
   Logout,
   getUser,
   Login,
+  updateUser,
 };
 

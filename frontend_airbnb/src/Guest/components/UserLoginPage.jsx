@@ -72,7 +72,6 @@
 //   }
 // `;
 
-
 // const UserLoginPage=()=>{
 //   const [credentials, setCredentials] = useState({ email: "", password: "" });
 //   const { dispatch } = useContext(logincontext);
@@ -136,7 +135,6 @@
 //   );
 // }
 
-
 // export default UserLoginPage;
 
 import React, { useState, useContext } from "react";
@@ -162,7 +160,7 @@ const fadeIn = keyframes`
 // Styled Components
 const LoginPageContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(to right,  #2fd76a,#e3daee);
+  background: linear-gradient(to right, #2fd76a, #e3daee);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -243,13 +241,13 @@ const UserLoginPage = () => {
   const [credentials, setCredentials] = useState({ email: "", password: "" });
   const { dispatch } = useContext(logincontext);
   const navigate = useNavigate();
-  const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+  const BASE_URL = "http://10.2.0.2:8000/api";
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const { data } = await axios.post(`http://localhost:8000/api/login`, credentials);
+      const { data } = await axios.post(`${BASE_URL}/login`, credentials);
 
       Cookies.set("authToken", data.authToken, { sameSite: "lax" });
       Cookies.set("ROLE", data.user.role, { sameSite: "lax" });
@@ -288,14 +286,18 @@ const UserLoginPage = () => {
             type="email"
             placeholder="Email"
             value={credentials.email}
-            onChange={(e) => setCredentials({ ...credentials, email: e.target.value })}
+            onChange={(e) =>
+              setCredentials({ ...credentials, email: e.target.value })
+            }
             required
           />
           <Input
             type="password"
             placeholder="Password"
             value={credentials.password}
-            onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
+            onChange={(e) =>
+              setCredentials({ ...credentials, password: e.target.value })
+            }
             required
           />
           <Button type="submit">Login</Button>
@@ -306,4 +308,3 @@ const UserLoginPage = () => {
 };
 
 export default UserLoginPage;
-

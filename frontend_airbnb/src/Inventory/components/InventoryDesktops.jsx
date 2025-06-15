@@ -5,7 +5,8 @@ const InventoryDesktops = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
-const BASE_URL = "http://localhost:8000/api";
+const BASE_URL = "http://10.2.0.2:8000/api";
+
   // Fetch all inventory records on component mount
   useEffect(() => {
     fetchInventory();

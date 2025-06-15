@@ -165,7 +165,7 @@ const Get5ProductFinishesFields = async (req, res) => {
     const request = new sql.Request();
     const result = await request.query(`
       SELECT FinishedBy, FinishDate, QTY, Area, SerialNumber 
-      FROM ProductFinish
+      FROM ProductFinish;
     `);
 
     res.status(200).json({ success: true, data: result.recordset });

@@ -13,8 +13,6 @@ import Admin from "./Admin";
 import Technician from "./Technician";
 import ProductFinish from "./ProductFinish";
 
-
-
 import { logincontext } from "./GlobalContext/context";
 import { decodeToken } from "react-jwt";
 import Inventory from "./Inventory";
@@ -25,8 +23,8 @@ const ComponentByRole = {
   guest: Guest,
   admin: Admin,
   inventory: Inventory,
-  Technician: Technician,
-  productfinish: ProductFinish,
+  technician: Technician,
+  product_finish: ProductFinish,
 };
 
 //ab hum function bana rahy iska format hota ha const naamOfFunction = (parameters jo isky hoty) => {yahan jo bhi wo kr k return krta}
@@ -60,7 +58,7 @@ function App() {
       return undefined;
     } else {
       const res = decodeToken(authToken);
-      return res?.Role;
+      return res?.role?.toLowerCase()
     }
   };
 
@@ -69,8 +67,7 @@ function App() {
 
   return (
     <>
-    
-    <CurrentUser />
+      <CurrentUser />
       {/* Dynamically render based on role */}
     </>
   );

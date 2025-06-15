@@ -19,7 +19,8 @@ const InventoryAO = () => {
     "QTY_Recieved",
     "QTY_On_Hand",
   ];
-  BASE_URL = "http://localhost:8000/api";
+  const BASE_URL = "http://10.2.0.2:8000/api";
+
   // Fetch inventory on mount
   useEffect(() => {
     fetchInventory();

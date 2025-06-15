@@ -1,234 +1,152 @@
-// import React, { useState } from "react";
-// import { useNavigate, Link } from "react-router-dom";
-// import styled from "styled-components";
-// import Swal from "sweetalert2";
-// import axios from "axios";
-
-// const FormContainer = styled.div`
-//   margin: 4rem auto;
-//   max-width: 30rem;
-//   text-align: center;
-
-//   h1 {
-//     font-size: 2.5rem;
-//   text-align: center;
-//   margin-bottom: 2rem;
-//   margin-top: 7rem;
-//   font-family: "Helvetica";
-//   }
-
-
-
-//   input {
-//     width: 100%;
-//     padding: 1rem;
-//     margin-bottom: 1rem;
-//     border: 1px solid #ccc;
-//     border-radius: 4px;
-//     transition: border-color 0.3s;
-//     &:focus {
-//       border-color: #007bff;
-//     }
-//   }
-
-//   button {
-//     display: block;
-//     width: 100%;
-//     padding: 1rem;
-//     margin-top: 1rem;
-//     background-color: #007bff;
-//     color: white;
-//     border: none;
-//     border-radius: 4px;
-//     cursor: pointer;
-//     transition: background-color 0.3s;
-//     &:hover {
-//       background-color: #0056b3;
-//     }
-//   }
-
-//   .login-link {
-//     font-weight: bold;
-//     margin-top: 1rem;
-//     display: block;
-//     color: #007bff;
-//     transition: color 0.3s;
-//     &:hover {
-//       color: #0056b3;
-//     }
-//   }
-// `;
-
-// const RegisterUser = () => {
-//   const [name, setName] = useState("");
-//   const [email, setEmail] = useState("");
-//   const [password, setPassword] = useState("");
-
-  
-//   let navigate = useNavigate();
-//   const handleSignUpSubmit = async (e) => {
-//     e.preventDefault();
-//     const payload = {
-//       name: name,
-//       email: email,
-//       password: password,
-//     };
-//     console.log(payload)
-//     axios.post(`https://localhost:8000/api/createUser`, payload).then((json) => {
-//       const payload2 = {
-//         name: json.data.name,
-//         email: json.data.email,
-//         password: password,
-//       };
-//       console.log(`payload sent : ${payload2}`);
-      
-//     });
-//     Swal.fire({
-//       title: "Account Created",
-//       text: "Thank you for Opening Account",
-//       confirmButtonText: "Continue ",
-//     });
-//     navigate('/login')
-//   };
-
-//   return (
-//     <FormContainer>
-//       <h1>Register yourself</h1>
-//       <form onSubmit={handleSignUpSubmit}>
-//         <input
-//           type="name"
-//           name="name"
-//           placeholder="Enter your name"
-//           value={name}
-//           onChange={(e) => setName(e.target.value)}
-//         />
-//         <input
-//           type="email"
-//           name="email"
-//           placeholder="123@email.com"
-//           value={email}
-//           onChange={(e) => setEmail(e.target.value)}
-//         />
-//         <input
-//           type="password"
-//           name="password"
-//           placeholder="password"
-//           value={password}
-//           onChange={(e) => setPassword(e.target.value)}
-//         />
-
-//         <button>Register</button>
-//         <div className="text-center font-bold">
-//           Already have an account???
-//           <Link to={"/login"} className="login-link">
-//             Login
-//           </Link>
-//         </div>
-//       </form>
-//     </FormContainer>
-//   );
-// };
-
-// export default RegisterUser;
-
-
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import styled from "styled-components";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+  Alert,
+  Stack,
+  Link,
+} from "@mui/material";
 import Swal from "sweetalert2";
 import axios from "axios";
 
-const FormContainer = styled.div`
-  /* your styles */
-`;
+const BASE_URL = "http://10.2.0.2:8000/api";
 
-const RegisterUser = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+const RegisterUser = ({ updateMode = false, userData = {} }) => {
+  const [name, setName] = useState(userData.name || "");
+  const [email, setEmail] = useState(userData.email || "");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("technician"); // default role or empty string
-const BASE_URL= "http://10.2.0.2:8000/api";
+  const [role, setRole] = useState(userData.role || "technician");
+  const [error, setError] = useState(null);
+
   const navigate = useNavigate();
 
-  const handleSignUpSubmit = async (e) => {
+  // Optional: Update form values if props change
+  useEffect(() => {
+    if (updateMode) {
+      setName(userData.name || "");
+      setEmail(userData.email || "");
+      setRole(userData.role || "technician");
+    }
+  }, [userData, updateMode]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
+
     const payload = {
       name,
       email,
-      password,
-      role,  // <-- send role here
+      role,
     };
 
+    if (!updateMode) payload.password = password;
+    if (updateMode) payload.id = userData.id;
+
     try {
-      const response = await axios.post(`${BASE_URL}/createUser`, payload);
-      
-      Swal.fire({
-        title: "Account Created",
-        text: "Thank you for Registering the User",
-        confirmButtonText: "Continue",
-      });
+      if (updateMode) {
+        await axios.put(`${BASE_URL}/updateUser`, payload);
+        Swal.fire("Updated!", "User details updated.", "success");
+      } else {
+        await axios.post(`${BASE_URL}/createUser`, payload);
+        Swal.fire("Account Created", "User registered successfully.", "success");
+      }
 
       navigate("/login");
-    } catch (error) {
-      Swal.fire({
-        title: "Error",
-        text: error.response?.data?.message || "Registration failed",
-        icon: "error",
-      });
+    } catch (err) {
+      setError(err.response?.data?.message || "Operation failed");
     }
   };
 
   return (
-    <FormContainer>
-      <h1>Register yourself</h1>
-      <form onSubmit={handleSignUpSubmit}>
-        <input
-          type="text"
-          name="name"
-          placeholder="Enter your name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="123@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+    <Container maxWidth="sm">
+      <Box
+        sx={{
+          mt: 8,
+          p: 4,
+          boxShadow: 3,
+          borderRadius: 2,
+          backgroundColor: "background.paper",
+        }}
+      >
+        <Typography variant="h4" align="center" gutterBottom>
+          {updateMode ? "Update User" : "Register Yourself"}
+        </Typography>
 
-        {/* Role selector */}
-        <select
-          name="role"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-          required
-        >
-          <option value="admin">Admin</option>
-          <option value="technician">Technician</option>
-          <option value="Inventory">Inventory</option>
-          <option value="productfinish">Product Finish</option>
-        </select>
+        {error && <Alert severity="error">{error}</Alert>}
 
-        <button type="submit">Register</button>
-        <div className="text-center font-bold">
-          Already have an account???{" "}
-          <Link to={"/login"} className="login-link">
-            Login
-          </Link>
-        </div>
-      </form>
-    </FormContainer>
+        <Box component="form" onSubmit={handleSubmit} noValidate>
+          <Stack spacing={3}>
+            <TextField
+              label="Name"
+              variant="outlined"
+              fullWidth
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+
+            <TextField
+              label="Email"
+              type="email"
+              variant="outlined"
+              fullWidth
+              required
+              disabled={updateMode} // prevent email change during update
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+
+            {!updateMode && (
+              <TextField
+                label="Password"
+                type="password"
+                variant="outlined"
+                fullWidth
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            )}
+
+            <FormControl fullWidth required>
+              <InputLabel id="role-label">Role</InputLabel>
+              <Select
+                labelId="role-label"
+                value={role}
+                label="Role"
+                onChange={(e) => setRole(e.target.value)}
+              >
+                <MenuItem value="admin">Admin</MenuItem>
+                <MenuItem value="technician">Technician</MenuItem>
+                <MenuItem value="inventory">Inventory</MenuItem>
+                <MenuItem value="product_finish">Product Finish</MenuItem>
+              </Select>
+            </FormControl>
+
+            <Button type="submit" variant="contained" size="large" fullWidth>
+              {updateMode ? "Update User" : "Register"}
+            </Button>
+          </Stack>
+        </Box>
+
+        {!updateMode && (
+          <Typography variant="body2" align="center" sx={{ mt: 3 }}>
+            Already have an account?{" "}
+            <Link component={RouterLink} to="/login" underline="hover">
+              Login
+            </Link>
+          </Typography>
+        )}
+      </Box>
+    </Container>
   );
 };
 

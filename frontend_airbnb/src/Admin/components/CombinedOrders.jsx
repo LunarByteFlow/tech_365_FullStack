@@ -19,8 +19,10 @@ const CombinedOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const BASE_URL = "http://10.2.0.2:8000/api";
+
   useEffect(() => {
-    fetch("http://localhost:8000/api/Get_CombinedOrders")
+    fetch(`${BASE_URL}/Get5ProductFinishesFields`)
       .then((res) => res.json())
       .then((data) => {
         if (data.success) {
@@ -54,7 +56,12 @@ const CombinedOrders = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 5 }}>
       <Paper elevation={4} sx={{ p: 4, borderRadius: 3 }}>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" mb={3}>
+        <Stack
+          direction="row"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={3}
+        >
           <Typography variant="h5" sx={{ fontWeight: 600 }}>
             📋 Combined Orders View
           </Typography>
@@ -76,25 +83,25 @@ const CombinedOrders = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Order No</TableCell>
+                <TableCell>Finished By</TableCell>
+                <TableCell>Finish Date</TableCell>
                 <TableCell>QTY</TableCell>
-                <TableCell>Model</TableCell>
-                <TableCell>Brand</TableCell>
-                <TableCell>Dispatched</TableCell>
-                <TableCell>Courier</TableCell>
-                <TableCell>ProductFinish</TableCell>
+                <TableCell>Area</TableCell>
+                <TableCell>Serial Number</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {orders.map((row, idx) => (
                 <TableRow key={idx}>
-                  <TableCell>{row["Order No"]}</TableCell>
+                  <TableCell>{row.FinishedBy}</TableCell>
+                  <TableCell>
+                    {row.FinishDate
+                      ? new Date(row.FinishDate).toLocaleDateString()
+                      : ""}
+                  </TableCell>
                   <TableCell>{row.QTY}</TableCell>
-                  <TableCell>{row.Model}</TableCell>
-                  <TableCell>{row.Brand}</TableCell>
-                  <TableCell>{row.Dispatched}</TableCell>
-                  <TableCell>{row.Courier}</TableCell>
-                  <TableCell>{row.ProductFinish}</TableCell>
+                  <TableCell>{row.Area}</TableCell>
+                  <TableCell>{row.SerialNumber}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

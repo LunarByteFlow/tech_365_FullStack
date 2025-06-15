@@ -13,7 +13,7 @@ import {
 
 const LaptopPrebuilt = () => {
   const [returns, setReturns] = useState([]);
-const BASE_URL="http://10.2.0.2:8000/api";
+  const BASE_URL = "http://10.2.0.2:8000/api";
   useEffect(() => {
     fetch(`${BASE_URL}/GetAllPrebuiltLaptops`)
       .then((res) => res.json())
@@ -30,7 +30,7 @@ const BASE_URL="http://10.2.0.2:8000/api";
   return (
     <Container sx={{ mt: 4 }}>
       <Typography variant="h5" gutterBottom>
-        Returns
+        Laptop Prebuilt
       </Typography>
 
       <TableContainer component={Paper}>

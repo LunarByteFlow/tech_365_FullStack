@@ -18,11 +18,10 @@ import {
   Grid,
 } from "@mui/material";
 
-// const BASE_URL = "http://localhost:8000/api";
-const BASE_URL= "http://10.2.0.2:8000/api";
+// Replace with your real backend URL
+const BASE_URL = "http://10.2.0.2:8000/api";
 
 const emptyDesktop = {
-  Prebuilt_ID: "",
   Built_By: "",
   Install_By: "",
   Item_Type: "",
@@ -44,16 +43,11 @@ const PrebuiltDesktops = () => {
   const [editingDesktop, setEditingDesktop] = useState(null);
   const [formData, setFormData] = useState(emptyDesktop);
 
-  // Fetch all desktops
   const fetchDesktops = async () => {
     setLoading(true);
     try {
       const res = await axios.get(`${BASE_URL}/GetAllPrebuiltDesktops`);
-      if (res.data.success) {
-        setDesktops(res.data.data);
-      } else {
-        setDesktops([]);
-      }
+      setDesktops(res.data.success ? res.data.data : []);
     } catch (error) {
       console.error("Error fetching desktops:", error);
       setDesktops([]);
@@ -65,26 +59,18 @@ const PrebuiltDesktops = () => {
     fetchDesktops();
   }, []);
 
-  // Open dialog for add or edit
   const handleOpenDialog = (desktop = null) => {
-    if (desktop) {
-      setEditingDesktop(desktop);
-      setFormData(desktop);
-    } else {
-      setEditingDesktop(null);
-      setFormData(emptyDesktop);
-    }
+    setEditingDesktop(desktop);
+    setFormData(desktop || emptyDesktop);
     setOpenDialog(true);
   };
 
-  // Close dialog
   const handleCloseDialog = () => {
     setOpenDialog(false);
     setEditingDesktop(null);
     setFormData(emptyDesktop);
   };
 
-  // Handle input change in form
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -93,25 +79,25 @@ const PrebuiltDesktops = () => {
     }));
   };
 
-  // Submit form to create or update
   const handleSubmit = async () => {
-    // Validation (basic)
     if (!formData.Model || !formData.Brand || !formData.SERIAL_NO) {
       alert("Model, Brand, and Serial No. are required.");
       return;
     }
 
     try {
+      // Remove Prebuilt_ID from payload
+      const { Prebuilt_ID, Prebuilt_Desktops_ID, ...payload } = formData;
+
       if (editingDesktop) {
-        // Update existing desktop
         await axios.put(
           `${BASE_URL}/UpdatePrebuiltDesktop/${editingDesktop.Prebuilt_Desktops_ID}`,
-          formData
+          payload
         );
       } else {
-        // Create new desktop
-        await axios.post(`${BASE_URL}/CreatePrebuiltDesktop`, formData);
+        await axios.post(`${BASE_URL}/CreatePrebuiltDesktop`, payload);
       }
+
       fetchDesktops();
       handleCloseDialog();
     } catch (error) {
@@ -120,9 +106,9 @@ const PrebuiltDesktops = () => {
     }
   };
 
-  // Delete desktop
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this desktop?")) return;
+    if (!window.confirm("Are you sure you want to delete this desktop?"))
+      return;
 
     try {
       await axios.delete(`${BASE_URL}/DeletePrebuiltDesktop/${id}`);
@@ -138,7 +124,11 @@ const PrebuiltDesktops = () => {
       <Typography variant="h4" gutterBottom>
         Prebuilt Desktops Inventory
       </Typography>
-      <Button variant="contained" onClick={() => handleOpenDialog(null)} sx={{ mb: 2 }}>
+      <Button
+        variant="contained"
+        onClick={() => handleOpenDialog(null)}
+        sx={{ mb: 2 }}
+      >
         Add New Desktop
       </Button>
 
@@ -165,7 +155,6 @@ const PrebuiltDesktops = () => {
                 </TableCell>
               </TableRow>
             )}
-
             {desktops.map((desktop) => (
               <TableRow key={desktop.Prebuilt_Desktops_ID}>
                 <TableCell>{desktop.Model}</TableCell>
@@ -199,145 +188,42 @@ const PrebuiltDesktops = () => {
         </Table>
       </TableContainer>
 
-      {/* Dialog for Add/Edit */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>{editingDesktop ? "Edit Desktop" : "Add New Desktop"}</DialogTitle>
+      <Dialog
+        open={openDialog}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          {editingDesktop ? "Edit Desktop" : "Add New Desktop"}
+        </DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
-            <Grid item xs={6}>
-              <TextField
-                label="Model"
-                name="Model"
-                value={formData.Model}
-                onChange={handleChange}
-                fullWidth
-                required
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Brand"
-                name="Brand"
-                value={formData.Brand}
-                onChange={handleChange}
-                fullWidth
-                required
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Serial No."
-                name="SERIAL_NO"
-                value={formData.SERIAL_NO}
-                onChange={handleChange}
-                fullWidth
-                required
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="QTY"
-                name="QTY"
-                type="number"
-                value={formData.QTY}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Processor"
-                name="Processor"
-                value={formData.Processor}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="RAM"
-                name="RAM"
-                value={formData.RAM}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Hard Drive"
-                name="Hard_Drive"
-                value={formData.Hard_Drive}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Operating System"
-                name="OS"
-                value={formData.OS}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Built By"
-                name="Built_By"
-                value={formData.Built_By}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Install By"
-                name="Install_By"
-                value={formData.Install_By}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Item Type"
-                name="Item_Type"
-                value={formData.Item_Type}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Location"
-                name="PreB_Desk_Location"
-                value={formData.PreB_Desk_Location}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
-
-            <Grid item xs={6}>
-              <TextField
-                label="Prebuilt ID"
-                name="Prebuilt_ID"
-                type="number"
-                value={formData.Prebuilt_ID}
-                onChange={handleChange}
-                fullWidth
-              />
-            </Grid>
+            {[
+              { label: "Model", name: "Model" },
+              { label: "Brand", name: "Brand" },
+              { label: "Serial No.", name: "SERIAL_NO" },
+              { label: "QTY", name: "QTY", type: "number" },
+              { label: "Processor", name: "Processor" },
+              { label: "RAM", name: "RAM" },
+              { label: "Hard Drive", name: "Hard_Drive" },
+              { label: "Operating System", name: "OS" },
+              { label: "Built By", name: "Built_By" },
+              { label: "Install By", name: "Install_By" },
+              { label: "Item Type", name: "Item_Type" },
+              { label: "Location", name: "PreB_Desk_Location" },
+            ].map(({ label, name, type = "text" }) => (
+              <Grid item xs={6} key={name}>
+                <TextField
+                  label={label}
+                  name={name}
+                  type={type}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  fullWidth
+                />
+              </Grid>
+            ))}
           </Grid>
         </DialogContent>
 

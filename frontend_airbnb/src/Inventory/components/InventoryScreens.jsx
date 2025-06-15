@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Typography
-} from '@mui/material';
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from "@mui/material";
 
 const InventoryScreen = () => {
   const [screens, setScreens] = useState([]);
-// const BASE_URL ="http://localhost:8000/api";
-const BASE_URL= "http://10.2.0.2:8000/api";
+  // const BASE_URL ="http://localhost:8000/api";
+  const BASE_URL = "http://10.2.0.2:8000/api";
   const fetchScreens = async () => {
     try {
       const res = await axios.get(`${BASE_URL}/Get_AllInventoryScreens`); // Adjust URL if needed
       setScreens(res.data.data);
     } catch (error) {
-      console.error('Error fetching screens:', error);
+      console.error("Error fetching screens:", error);
     }
   };
 
@@ -24,7 +30,9 @@ const BASE_URL= "http://10.2.0.2:8000/api";
 
   return (
     <Paper sx={{ padding: 2 }}>
-      <Typography variant="h5" gutterBottom>Inventory Screens</Typography>
+      <Typography variant="h5" gutterBottom>
+        Inventory Screens
+      </Typography>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>

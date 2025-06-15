@@ -3,80 +3,23 @@ const sql = require("mssql");
 
 const postAnOrder = async (req, res) => {
   const {
-    PackedBy,
-    BuiltBy,
-    InstallBy,
-    ItemType,
-    OrderNo,
-    QTY,
-    Model,
-    Brand,
-    SERIALNo,
-    Processor,
-    RAM,
-    HardDrive,
-    OS,
-    Cable,
-    Comment,
-    Courier,
-    Dispatched,
-    OrderID,
-    PostCode,
-    DispatchDate,
-    Prebuilt_Or_Inventory,
-    OrderSheet_ID,
+    PackedBy, BuiltBy, InstallBy, ItemType, OrderNo, QTY,
+    Model, Brand, SERIALNo, Processor, RAM, HardDrive, OS,
+    Cable, Comment, Courier, Dispatched, OrderID, PostCode,
+    DispatchDate, Prebuilt_Or_Inventory,
+    // Removed OrderSheet_ID here
   } = req.body;
 
   if (!OrderNo || !Model || !Brand || !SERIALNo) {
-    return res.status(403).json({ message: "Missing Required Fields" });
+    return res.status(400).json({ message: "Missing required fields." });
   }
-
-  let transaction;
 
   try {
     await connectDB();
 
-    transaction = new sql.Transaction();
-    await transaction.begin();
+    const request = new sql.Request();
 
-    // Step 1: Check available stock
-    const stockRequest = new sql.Request(transaction);
-    const stockResult = await stockRequest
-      .input("Model", sql.VarChar, Model)
-      .query(`SELECT Available FROM [Inventory & Order] WHERE Model = @Model`);
-
-    const availableStock = stockResult.recordset[0]?.Available;
-
-    if (availableStock === undefined) {
-      await transaction.rollback();
-      return res.status(404).json({
-        success: false,
-        message: `Item with Model ${Model} not found in inventory.`,
-      });
-    }
-
-    if (availableStock < QTY) {
-      await transaction.rollback();
-      return res.status(400).json({
-        success: false,
-        message: `Not enough stock for model ${Model}.`,
-      });
-    }
-
-    // Step 2: Deduct ordered quantity from inventory
-    const updateRequest = new sql.Request(transaction);
-    await updateRequest
-      .input("Model", sql.VarChar, Model)
-      .input("QTY", sql.Int, QTY)
-      .query(`
-        UPDATE [Inventory & Order]
-        SET Available = Available - @QTY
-        WHERE Model = @Model
-      `);
-
-    // Step 3: Insert the order into the OrderSheet table
-    const insertRequest = new sql.Request(transaction);
-    await insertRequest
+    await request
       .input("PackedBy", sql.VarChar, PackedBy)
       .input("BuiltBy", sql.VarChar, BuiltBy)
       .input("InstallBy", sql.VarChar, InstallBy)
@@ -98,65 +41,39 @@ const postAnOrder = async (req, res) => {
       .input("PostCode", sql.VarChar, PostCode)
       .input("DispatchDate", sql.VarChar, DispatchDate)
       .input("Prebuilt_Or_Inventory", sql.VarChar, Prebuilt_Or_Inventory)
-      .input("OrderSheet_ID", sql.VarChar, OrderSheet_ID)
+      // Removed input for OrderSheet_ID here
+
       .query(`
-        INSERT INTO [OrderSheet](
-          PackedBy, BuiltBy, InstallBy, ItemType, OrderNo, QTY, Model, Brand, SERIALNo,
-          Processor, RAM, HardDrive, OS, Cable, Comment, Courier, Dispatched, OrderID,
-          PostCode, DispatchDate, Prebuilt_Or_Inventory, OrderSheet_ID
-        ) VALUES (
-          @PackedBy, @BuiltBy, @InstallBy, @ItemType, @OrderNo, @QTY, @Model, @Brand, @SERIALNo,
-          @Processor, @RAM, @HardDrive, @OS, @Cable, @Comment, @Courier, @Dispatched, @OrderID,
-          @PostCode, @DispatchDate, @Prebuilt_Or_Inventory, @OrderSheet_ID
+        INSERT INTO [OrderSheet] (
+          PackedBy, BuiltBy, InstallBy, ItemType, OrderNo, QTY, Model, Brand,
+          SERIALNo, Processor, RAM, HardDrive, OS, Cable, Comment, Courier,
+          Dispatched, OrderID, PostCode, DispatchDate, Prebuilt_Or_Inventory
+          -- Removed OrderSheet_ID column here
+        )
+        VALUES (
+          @PackedBy, @BuiltBy, @InstallBy, @ItemType, @OrderNo, @QTY, @Model, @Brand,
+          @SERIALNo, @Processor, @RAM, @HardDrive, @OS, @Cable, @Comment, @Courier,
+          @Dispatched, @OrderID, @PostCode, @DispatchDate, @Prebuilt_Or_Inventory
+          -- Removed @OrderSheet_ID value here
         )
       `);
 
-    // Commit transaction
-    await transaction.commit();
-
-    res.status(201).json({
-      success: true,
-      message: "Order added successfully and inventory updated.",
-    });
+    res.status(201).json({ success: true, message: "Order added successfully." });
   } catch (error) {
     console.error("Error creating order:", error);
-
-    if (transaction) {
-      try {
-        await transaction.rollback();
-      } catch (rollbackError) {
-        console.error("Error during transaction rollback:", rollbackError);
-      }
-    }
-
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
+// Update_Order: leave OrderSheet_ID as is if you want to update it (but usually you don't update identity columns)
+// If OrderSheet_ID is identity, it's better to NOT update it:
 const Update_Order = async (req, res) => {
   const {
-    OrderNo, // Needed for update identification
-    PackedBy,
-    BuiltBy,
-    InstallBy,
-    ItemType,
-    QTY,
-    Model,
-    Brand,
-    SERIALNo,
-    Processor,
-    RAM,
-    HardDrive,
-    OS,
-    Cable,
-    Comment,
-    Courier,
-    Dispatched,
-    OrderID,
-    PostCode,
-    DispatchDate,
-    Prebuilt_Or_Inventory,
-    OrderSheet_ID,
+    OrderNo, PackedBy, BuiltBy, InstallBy, ItemType, QTY,
+    Model, Brand, SERIALNo, Processor, RAM, HardDrive, OS,
+    Cable, Comment, Courier, Dispatched, OrderID, PostCode,
+    DispatchDate, Prebuilt_Or_Inventory,
+    // Removed OrderSheet_ID from update fields
   } = req.body;
 
   if (!OrderNo) {
@@ -189,24 +106,24 @@ const Update_Order = async (req, res) => {
     if (PostCode !== undefined) fieldsToUpdate.push(`PostCode = @PostCode`) && request.input('PostCode', sql.VarChar, PostCode);
     if (DispatchDate !== undefined) fieldsToUpdate.push(`DispatchDate = @DispatchDate`) && request.input('DispatchDate', sql.VarChar, DispatchDate);
     if (Prebuilt_Or_Inventory !== undefined) fieldsToUpdate.push(`Prebuilt_Or_Inventory = @Prebuilt_Or_Inventory`) && request.input('Prebuilt_Or_Inventory', sql.VarChar, Prebuilt_Or_Inventory);
-    if (OrderSheet_ID !== undefined) fieldsToUpdate.push(`OrderSheet_ID = @OrderSheet_ID`) && request.input('OrderSheet_ID', sql.VarChar, OrderSheet_ID);
+    // Removed update for OrderSheet_ID here
 
     if (fieldsToUpdate.length === 0) {
-      return res.status(400).json({ message: "No fields to update provided." });
+      return res.status(400).json({ message: "No fields provided for update." });
     }
 
-    const query = `
+    request.input("OrderNo", sql.VarChar, OrderNo);
+
+    const updateQuery = `
       UPDATE [OrderSheet]
       SET ${fieldsToUpdate.join(", ")}
       WHERE OrderNo = @OrderNo
     `;
 
-    request.input('OrderNo', sql.VarChar, OrderNo);
-
-    const result = await request.query(query);
+    const result = await request.query(updateQuery);
 
     if (result.rowsAffected[0] === 0) {
-      return res.status(404).json({ success: false, message: "No order found with the provided OrderNo." });
+      return res.status(404).json({ success: false, message: "Order not found." });
     }
 
     res.status(200).json({ success: true, message: "Order updated successfully." });
@@ -219,58 +136,74 @@ const Update_Order = async (req, res) => {
 const Get_Orders = async (req, res) => {
   try {
     await connectDB();
-
     const request = new sql.Request();
-
-    const result = await request.query(`SELECT * FROM [OrderSheet]`);
+    const result = await request.query("SELECT * FROM [OrderSheet]");
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ success: false, message: "No order records found." });
+      return res.status(404).json({ success: false, message: "No orders found." });
     }
 
     res.status(200).json({ success: true, data: result.recordset });
   } catch (error) {
-    console.error("Error fetching order data:", error);
+    console.error("Error fetching orders:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
-const Get_CombinedOrders = async (req, res) => {
+const Get_SingleOrderById = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: "Order ID required." });
+  }
+
   try {
     await connectDB();
-
     const request = new sql.Request();
+    request.input("OrderSheet_ID", sql.VarChar, id);
 
-    const query = `
-      SELECT
-        os.[OrderNo] AS [Order No],
-        os.QTY,
-        os.Model,
-        os.Brand,
-        os.Dispatched,
-        os.Courier,
-        pf.ProductFinish
-      FROM [OrderSheet] os
-      LEFT JOIN [ProductFinish] pf ON os.[OrderNo] = pf.[OrderNo]
-    `;
-
-    const result = await request.query(query);
+    const result = await request.query("SELECT * FROM [OrderSheet] WHERE OrderSheet_ID = @OrderSheet_ID");
 
     if (result.recordset.length === 0) {
-      return res.status(404).json({ success: false, message: "No records found." });
+      return res.status(404).json({ success: false, message: "Order not found." });
     }
 
-    res.status(200).json({ success: true, data: result.recordset });
+    res.status(200).json({ success: true, data: result.recordset[0] });
   } catch (error) {
-    console.error("Error fetching combined orders:", error);
+    console.error("Error fetching order:", error);
     res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 };
 
+const Delete_OrderById = async (req, res) => {
+  const { id } = req.params;
+
+  if (!id) {
+    return res.status(400).json({ success: false, message: "Order ID required." });
+  }
+
+  try {
+    await connectDB();
+    const request = new sql.Request();
+    request.input("OrderSheet_ID", sql.VarChar, id);
+
+    const result = await request.query("DELETE FROM [OrderSheet] WHERE OrderSheet_ID = @OrderSheet_ID");
+
+    if (result.rowsAffected[0] === 0) {
+      return res.status(404).json({ success: false, message: "No order found to delete." });
+    }
+
+    res.status(200).json({ success: true, message: "Order deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res.status(500).json({ success: false, error: "Internal Server Error" });
+  }
+};
 
 module.exports = {
   postAnOrder,
   Update_Order,
   Get_Orders,
-  Get_CombinedOrders
+  Delete_OrderById,
+  Get_SingleOrderById
 };

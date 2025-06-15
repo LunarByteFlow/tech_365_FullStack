@@ -89,7 +89,11 @@ const InventoryNavbar = () => {
       Cookies.remove("ROLE");
       dispatch({ type: "LOGOUT" });
 
-      Swal.fire("Logged out", "You have been logged out successfully.", "success");
+      Swal.fire(
+        "Logged out",
+        "You have been logged out successfully.",
+        "success"
+      );
       navigate("/login");
     }
   };
@@ -97,11 +101,14 @@ const InventoryNavbar = () => {
   const navLinks = [
     { text: "Dispatch", to: "Get_Dispatch" },
     { text: "Orders", to: "Get_Orders" },
-    { text: "Inventory_Laptops", to: "Inventory_Laptops" },
-    { text: "Inventory_Desktops", to: "Inventory_Desktops" },
-    { text: "Inventory_AO", to: "Inventory_AO" },
-    { text: "Inventory_Screens", to: "Inventory_Screens" },
-    { text: "Inventory_Parts", to: "Inventory_Parts" },
+    { text: "Laptops", to: "Inventory_Laptops" },
+    { text: "Desktops", to: "Inventory_Desktops" },
+    { text: "AO", to: "Inventory_AO" },
+    { text: "Screens", to: "Inventory_Screens" },
+    { text: "Parts", to: "Inventory_Parts" },
+    { text: "Laptop Prebuilt", to: "Laptop_Prebuilt" },
+    { text: "Desktop prebuilt", to: "Desktop_Prebuilt" }
+
   ];
 
   const authLinks = [{ text: "Logout", onClick: handleLogout }];

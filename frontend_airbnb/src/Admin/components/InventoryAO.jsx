@@ -1,7 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  CircularProgress,
+  Box,
+  Snackbar,
+  Alert,
+} from "@mui/material";
 
-// const baseUrl = "https://localhost:8000/api";
-const BASE_URL= "http://10.2.0.2:8000/api";
+const BASE_URL = "http://10.2.0.2:8000/api";
 
 const InventoryAO = () => {
   const initialFormState = {
@@ -24,8 +41,10 @@ const InventoryAO = () => {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-const BASE_URL= "http://10.2.0.2:8000/api";
-  // Fetch all inventory records on component mount
+  const [successMsg, setSuccessMsg] = useState("");
+
+  const fileInputRef = useRef(null);
+
   useEffect(() => {
     fetchInventory();
   }, []);
@@ -34,7 +53,7 @@ const BASE_URL= "http://10.2.0.2:8000/api";
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${BASE_URL}/api/Get_Inventory`);
+      const res = await fetch(`${BASE_URL}/Get_Inventory`);
       if (!res.ok) throw new Error("Failed to fetch inventory");
       const data = await res.json();
       if (data.success) {
@@ -49,15 +68,15 @@ const BASE_URL= "http://10.2.0.2:8000/api";
     }
   };
 
-  // Handle input changes in form
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Create new inventory
   const handleCreate = async () => {
     setError("");
+    setSuccessMsg("");
+    setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/Create_Inventory`, {
         method: "POST",
@@ -68,30 +87,35 @@ const BASE_URL= "http://10.2.0.2:8000/api";
       if (data.success) {
         fetchInventory();
         setForm(initialFormState);
+        setSuccessMsg("Inventory created successfully!");
       } else {
         setError(data.message || "Failed to create inventory");
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Start editing an inventory
   const startEdit = (item) => {
     setEditingId(item.InventoryAO_ID);
     setForm({ ...item, QTY_Recieved: item.QTY_Recieved ?? "", QTY_On_Hand: item.QTY_On_Hand ?? "" });
+    setError("");
+    setSuccessMsg("");
   };
 
-  // Cancel editing
   const cancelEdit = () => {
     setEditingId(null);
     setForm(initialFormState);
     setError("");
+    setSuccessMsg("");
   };
 
-  // Update inventory
   const handleUpdate = async () => {
     setError("");
+    setSuccessMsg("");
+    setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/Update_Inventory`, {
         method: "PUT",
@@ -102,19 +126,23 @@ const BASE_URL= "http://10.2.0.2:8000/api";
       if (data.success) {
         fetchInventory();
         cancelEdit();
+        setSuccessMsg("Inventory updated successfully!");
       } else {
         setError(data.message || "Failed to update inventory");
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Delete inventory by ID
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this inventory item?")) return;
 
     setError("");
+    setSuccessMsg("");
+    setLoading(true);
     try {
       const res = await fetch(`${BASE_URL}/Delete_Inventory/${id}`, {
         method: "DELETE",
@@ -122,96 +150,180 @@ const BASE_URL= "http://10.2.0.2:8000/api";
       const data = await res.json();
       if (data.success) {
         fetchInventory();
+        setSuccessMsg("Inventory deleted successfully!");
       } else {
         setError(data.message || "Failed to delete inventory");
       }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // CSV Upload handler
+  const handleCSVUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setError("");
+    setSuccessMsg("");
+    setLoading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch(`${BASE_URL}/UploadInventoryCSV`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSuccessMsg("CSV uploaded successfully!");
+        fetchInventory();
+      } else {
+        setError(data.message || "Failed to upload CSV");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      event.target.value = null; // reset file input
     }
   };
 
   return (
-    <div style={{ maxWidth: 900, margin: "2rem auto", fontFamily: "Arial, sans-serif" }}>
-      <h2>{editingId ? "Update Inventory" : "Create Inventory"}</h2>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 6 }}>
+      <Typography variant="h4" gutterBottom>
+        {editingId ? "Update Inventory" : "Create Inventory"}
+      </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {successMsg && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {successMsg}
+        </Alert>
+      )}
+
+      <Box mb={3}>
+        <input
+          type="file"
+          accept=".csv"
+          style={{ display: "none" }}
+          ref={fileInputRef}
+          onChange={handleCSVUpload}
+        />
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={() => fileInputRef.current.click()}
+          disabled={loading}
+          sx={{ mb: 2 }}
+        >
+          Upload CSV
+        </Button>
+      </Box>
+
+      <Grid container spacing={2} mb={3}>
         {Object.keys(initialFormState).map((field) => (
-          <div key={field}>
-            <label htmlFor={field} style={{ display: "block", fontWeight: "bold" }}>
-              {field.replace(/_/g, " ")}
-            </label>
-            <input
-              type={field.includes("QTY") ? "number" : "text"}
+          <Grid item xs={12} sm={6} md={4} key={field}>
+            <TextField
+              fullWidth
+              label={field.replace(/_/g, " ")}
               name={field}
-              id={field}
+              type={field.includes("QTY") ? "number" : "text"}
               value={form[field] || ""}
               onChange={handleChange}
               disabled={field === "InventoryAO_ID" && editingId !== null}
-              style={{ width: "100%", padding: "0.3rem" }}
+              size="small"
             />
-          </div>
+          </Grid>
         ))}
-      </div>
-      <button
-        onClick={editingId ? handleUpdate : handleCreate}
-        style={{ padding: "0.5rem 1rem", marginRight: "1rem" }}
-      >
-        {editingId ? "Update" : "Create"}
-      </button>
-      {editingId && (
-        <button onClick={cancelEdit} style={{ padding: "0.5rem 1rem", backgroundColor: "#ccc" }}>
-          Cancel
-        </button>
-      )}
+      </Grid>
 
-      <hr style={{ margin: "2rem 0" }} />
-
-      <h2>Inventory List</h2>
-      {loading ? (
-        <p>Loading inventory...</p>
-      ) : inventoryList.length === 0 ? (
-        <p>No inventory found.</p>
-      ) : (
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            marginTop: "1rem",
-            fontSize: "0.9rem",
-          }}
+      <Box mb={4}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={editingId ? handleUpdate : handleCreate}
+          disabled={loading}
+          sx={{ mr: 2 }}
         >
-          <thead>
-            <tr style={{ backgroundColor: "#f0f0f0" }}>
-              {Object.keys(initialFormState).map((header) => (
-                <th key={header} style={{ border: "1px solid #ddd", padding: "0.5rem" }}>
-                  {header.replace(/_/g, " ")}
-                </th>
-              ))}
-              <th style={{ border: "1px solid #ddd", padding: "0.5rem" }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {inventoryList.map((item) => (
-              <tr key={item.InventoryAO_ID}>
-                {Object.keys(initialFormState).map((field) => (
-                  <td key={field} style={{ border: "1px solid #ddd", padding: "0.5rem" }}>
-                    {item[field]}
-                  </td>
+          {loading ? <CircularProgress size={24} color="inherit" /> : editingId ? "Update" : "Create"}
+        </Button>
+        {editingId && (
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={cancelEdit}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+        )}
+      </Box>
+
+      <Typography variant="h5" gutterBottom>
+        Inventory List
+      </Typography>
+
+      {loading && !inventoryList.length ? (
+        <Box display="flex" justifyContent="center" my={4}>
+          <CircularProgress />
+        </Box>
+      ) : inventoryList.length === 0 ? (
+        <Typography>No inventory found.</Typography>
+      ) : (
+        <TableContainer component={Paper}>
+          <Table size="small" aria-label="inventory table">
+            <TableHead>
+              <TableRow>
+                {Object.keys(initialFormState).map((header) => (
+                  <TableCell key={header} sx={{ fontWeight: "bold" }}>
+                    {header.replace(/_/g, " ")}
+                  </TableCell>
                 ))}
-                <td style={{ border: "1px solid #ddd", padding: "0.5rem" }}>
-                  <button onClick={() => startEdit(item)} style={{ marginRight: 8 }}>
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(item.InventoryAO_ID)} style={{ color: "red" }}>
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                <TableCell sx={{ fontWeight: "bold" }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {inventoryList.map((item) => (
+                <TableRow key={item.InventoryAO_ID}>
+                  {Object.keys(initialFormState).map((field) => (
+                    <TableCell key={field}>{item[field]}</TableCell>
+                  ))}
+                  <TableCell>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => startEdit(item)}
+                      sx={{ mr: 1 }}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="error"
+                      onClick={() => handleDelete(item.InventoryAO_ID)}
+                    >
+                      Delete
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+    </Container>
   );
 };
 

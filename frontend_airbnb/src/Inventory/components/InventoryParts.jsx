@@ -1,11 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
-  Paper, Typography
-} from '@mui/material';
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
+} from "@mui/material";
 // const BASE_URL= "http://localhost:8000/api";
-const BASE_URL= "http://10.2.0.2:8000/api";
+const BASE_URL = "http://10.2.0.2:8000/api";
 const InventoryParts = () => {
   const [parts, setParts] = useState([]);
 
@@ -14,7 +20,7 @@ const InventoryParts = () => {
       const res = await axios.get(`${BASE_URL}/Get_AllPartInventory`); // Adjust URL if needed
       setParts(res.data.data);
     } catch (error) {
-      console.error('Error fetching parts:', error);
+      console.error("Error fetching parts:", error);
     }
   };
 
@@ -24,7 +30,9 @@ const InventoryParts = () => {
 
   return (
     <Paper sx={{ padding: 2 }}>
-      <Typography variant="h5" gutterBottom>Part Inventory</Typography>
+      <Typography variant="h5" gutterBottom>
+        Part Inventory
+      </Typography>
       <TableContainer component={Paper}>
         <Table>
           <TableHead>
