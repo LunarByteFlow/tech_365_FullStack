@@ -49,7 +49,6 @@ const initialFormState = {
   PostCode: "",
   DispatchDate: "",
   Prebuilt_Or_Inventory: "",
-  // Note: Removed OrderSheet_ID from initial state
 };
 
 const DisplayOrders = () => {
@@ -84,13 +83,8 @@ const DisplayOrders = () => {
   };
 
   const handleAddOrder = async () => {
-    if (!formData.OrderNo || !formData.Model || !formData.Brand || !formData.SERIALNo) {
-      Swal.fire("Validation error", "OrderNo, Model, Brand and SERIALNo are required", "warning");
-      return;
-    }
-
     try {
-      const { OrderSheet_ID, ...payload } = formData; // Strip out if accidentally present
+      const { OrderSheet_ID, ...payload } = formData;
       const res = await axios.post(`${BASE_URL}/AddOrder`, payload);
       if (res.data.success) {
         Swal.fire("Success", res.data.message, "success");
@@ -141,7 +135,7 @@ const DisplayOrders = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          const res = await axios.get(`${BASE_URL}/Delete_OrderById/${id}`);
+          const res = await axios.delete(`${BASE_URL}/Delete_OrderById/${id}`);
           if (res.data.success) {
             Swal.fire("Deleted!", res.data.message, "success");
             fetchOrders();
@@ -155,6 +149,35 @@ const DisplayOrders = () => {
     });
   };
 
+  const handleCSVUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("csvFile", file);
+
+    try {
+      const response = await axios.post(`${BASE_URL}/upload_csv`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.data.success) {
+        Swal.fire("Success", response.data.message, "success");
+        fetchOrders();
+      } else {
+        Swal.fire("Error", response.data.message || "Failed to upload CSV", "error");
+      }
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || error.message || "Failed to upload CSV due to network error.";
+      Swal.fire("Error", errorMessage, "error");
+    }
+  };
+
+  // --- Start of corrected rendering logic ---
+
+  // Show loading spinner if data is being fetched
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
@@ -163,21 +186,46 @@ const DisplayOrders = () => {
     );
   }
 
+  // Show an error message if fetching failed (but still display buttons below)
   if (error) {
     return (
-      <Box p={4}>
+      <Box p={4} sx={{ mt: 10 }}> {/* Add mt to ensure it's below any fixed header if applicable */}
         <Alert severity="error">{error}</Alert>
+        {/*
+          IMPORTANT: The buttons should be rendered here too if you want them
+          to be available even when there's an error. If the error is critical
+          and you don't want any interaction, then remove this Box.
+        */}
+        <Box display="flex" alignItems="center" mb={4} mt={2}>
+          <Button variant="contained" color="primary" onClick={() => setIsAddOpen(true)}>
+            Add New Order
+          </Button>
+          <Button variant="outlined" component="label" sx={{ ml: 2 }}>
+            Upload CSV
+            <input type="file" accept=".csv" hidden onChange={handleCSVUpload} />
+          </Button>
+        </Box>
       </Box>
     );
   }
 
+  // Once loading is complete and no critical error, render the main content
   return (
     <Box p={6} sx={{ mb: 4 }} mt={10}>
       <Typography variant="h4" mb={4}>Information of Orders</Typography>
-      <Button variant="contained" color="primary" onClick={() => setIsAddOpen(true)} sx={{ mb: 4 }}>
-        Add New Order
-      </Button>
 
+      {/* This Box is now OUTSIDE of any 'orders.length' conditional logic */}
+      <Box display="flex" alignItems="center" mb={4}>
+        <Button variant="contained" color="primary" onClick={() => setIsAddOpen(true)}>
+          Add New Order
+        </Button>
+        <Button variant="outlined" component="label" sx={{ ml: 2 }}>
+          Upload CSV
+          <input type="file" accept=".csv" hidden onChange={handleCSVUpload} />
+        </Button>
+      </Box>
+
+      {/* Conditional rendering for the list of orders or "No orders found" message */}
       {orders.length > 0 ? (
         orders.map((order) => (
           <Accordion key={order.OrderSheet_ID || order.OrderNo}>
@@ -210,7 +258,7 @@ const DisplayOrders = () => {
           </Accordion>
         ))
       ) : (
-        <Typography>No orders found.</Typography>
+        <Typography>No orders found. Add a new order or upload via CSV.</Typography>
       )}
 
       {[isAddOpen, isEditOpen].map((open, index) => (

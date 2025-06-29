@@ -8,20 +8,30 @@ import DisplayInventoryCheck from "../Guest/pages/DisplayInventoryCheck";
 import DisplayInventoryOrder from "../Guest/pages/DisplayInventoryOrder";
 import UpdateOrderForm from "../Guest/pages/UpdateOrderForm";
 import FiveFields from "./components/FiveFields";
+import ProductFinishLayout from "./components/ProductFinishLayout";
 export default function ProductFinish() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<ProductFinishHome />} />
-        <Route path="*" element={<ProductFinishHome />} />
-        <Route path="product_finish" element={<ProductFinishHome />} />
-        <Route path="Get_Dispatch" element={<DisplayDispatch />} />
-        <Route path="Get_Orders" element={<DisplayOrders />} />
-        <Route path="Get_Inventory_Check" element={<DisplayInventoryCheck />} />
-        <Route path="Get_Inventory_Order" element={<DisplayInventoryOrder />} />
-        <Route path="update_order" element={<UpdateOrderForm />} />
-        <Route path="AddOrder" element={<AddNewOrder />} />
-        <Route path="Get5ProductFinishesFields" element={<FiveFields />} />
+        <Route path="/" element={<ProductFinishLayout />}>
+          <Route index element={<ProductFinishHome />} />
+
+          {/* <Route path="product_finish" element={<ProductFinishHome />} /> */}
+          <Route path="Get_Dispatch" element={<DisplayDispatch />} />
+          <Route path="Get_Orders" element={<DisplayOrders />} />
+          <Route
+            path="Get_Inventory_Check"
+            element={<DisplayInventoryCheck />}
+          />
+          <Route
+            path="Get_Inventory_Order"
+            element={<DisplayInventoryOrder />}
+          />
+          <Route path="update_order" element={<UpdateOrderForm />} />
+          <Route path="AddOrder" element={<AddNewOrder />} />
+          <Route path="Get5ProductFinishesFields" element={<FiveFields />} />
+          <Route path="*" element={<ProductFinishHome />} />
+        </Route>
       </Routes>
     </>
   );

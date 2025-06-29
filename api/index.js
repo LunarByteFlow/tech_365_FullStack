@@ -32,6 +32,7 @@ const allowedOrigins = [
   "https://tech-365-full-stack.vercel.app/", // Your deployed frontend URL
   "http://localhost:3000", // Your local React development server URL
   "http://10.2.0.2",
+  "http://10.2.0.2:3000",
   "http://localhost:5173", // Common for Vite React apps // Replace with your actual frontend URL
   //   // Add other allowed origins if needed (e.g., preview deployments)
 ];

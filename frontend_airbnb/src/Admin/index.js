@@ -24,26 +24,7 @@ import AdminLayout from "./components/AdminLayout.jsx";
 export default function Admin() {
   return (
     <>
-      {/* <Routes>
-        <Route path="/" element={<AdminHome />} />
-        <Route path="*" element={<AdminHome />} />
-        <Route path="admin" element={<AdminHome />} />
-        <Route path="low-stock" element={<LowStockTable />} />
-        <Route path="register" element={<RegisterUser />} />
-        <Route path="Get_Orders" element={<DisplayOrders />} />
-        <Route path="update_order" element={<UpdateOrderForm />} />
-        <Route path="AddOrder" element={<AddNewOrder />} />
-        <Route path="download_csv" element={<DownloadCSV />} />
-        <Route path="order_returns" element={<OrderReturns />} />
-        <Route path="prebuilt_laptops" element={<PrebuiltLaptops />} />
-        <Route path="prebuilt_desktops" element={<PrebuiltDesktops />} />
-        <Route path="inventory_laptops" element={<InventoryLaptop />} />
-        <Route path="inventory_desktops" element={<InventoryDesktops />} />
-        <Route path="inventory_AO" element={<InventoryAO />} />
-        <Route path="inventory_parts" element={<InventoryParts />} />
-        <Route path="InventoryUploader" element={<InventoryUploader />} />
-        <Route path="CombinedOrders" element={<CombinedOrders />} />
-      </Routes> */}
+      
 
       <Routes>
         <Route path="/" element={<AdminLayout />}>

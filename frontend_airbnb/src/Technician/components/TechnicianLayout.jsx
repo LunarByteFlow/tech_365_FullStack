@@ -1,9 +1,8 @@
 // AdminLayout.jsx
 import React from "react";
 import { Outlet } from "react-router-dom";
-import InventoryNavbar from "./InventoryNavbar";
 import TechnicianNavbar from "./TechnicianNavbar";
-const InventoryLayout = () => {
+const TechnicianLayout = () => {
   return (
     <>
       <TechnicianNavbar />
@@ -14,4 +13,4 @@ const InventoryLayout = () => {
   );
 };
 
-export default InventoryLayout;
+export default TechnicianLayout;

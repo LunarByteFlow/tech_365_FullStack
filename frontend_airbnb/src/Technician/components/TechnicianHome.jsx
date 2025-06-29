@@ -9,7 +9,7 @@ const UserHome = () => {
         <Paper elevation={3} sx={{ padding: 4, borderRadius: 4 }}>
           <Box textAlign="center">
             <Typography variant="h4" gutterBottom>
-              Welcome to the User Panel
+              Welcome to the Technician Panel
             </Typography>
             <Typography variant="body1" color="text.secondary">
               You are currently viewing the Technician page as a Technician.
