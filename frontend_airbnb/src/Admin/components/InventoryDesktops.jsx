@@ -1,297 +1,267 @@
-import React, { useState, useEffect } from 'react';
-import { v4 as uuidv4 } from 'uuid'; // Don't forget to install uuid: npm install uuid
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Paper,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Stack,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+import { v4 as uuidv4 } from "uuid";
 
-const API_BASE_URL = 'http://localhost:8000/api/desktops'; // !! ADJUST THIS if your backend URL or path is different !!
-Create_DesktopInventory,
-    Get_AllDesktopInventory,
-    Get_DesktopInventoryById, // Added Get_DesktopInventoryById
-    Update_DesktopInventory,
-    Delete_DesktopInventory
+const BASE_URL = "http://10.2.0.2:8000/api";
+
+const initialFormState = {
+  Inventory_Desktops_ID: "",
+  Facility: "",
+  Location_: "",
+  Brand: "",
+  Model: "",
+  Type_: "",
+  Processor: "",
+  RAM: "",
+  Hard_Drive: "",
+  QTY_Recieved: "",
+  QTY_On_Hand: "",
+};
+
 const InventoryDesktops = () => {
-  const initialFormState = {
-    Inventory_Desktops_ID: '',
-    Facility: '',
-    Location_: '',
-    Brand: '',
-    Model: '',
-    Type_: '',
-    Processor: '',
-    RAM: '',
-    Hard_Drive: '',
-    QTY_Recieved: '',
-    QTY_On_Hand: '',
-  };
-
-  const [form, setForm] = useState(initialFormState);
   const [inventoryList, setInventoryList] = useState([]);
-  const [editingId, setEditingId] = useState(null); // Tracks the ID of the item being edited
+  const [form, setForm] = useState(initialFormState);
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null); // For success/info messages
-const BASE_URL= "http://10.2.0.2:8000/api";
-  // Fetch all inventory records on component mount
+  const [message, setMessage] = useState(null);
+
+  // Fetch inventory on mount
   useEffect(() => {
     fetchInventory();
   }, []);
-
-  // --- API Functions ---
 
   const fetchInventory = async () => {
     setLoading(true);
     setError(null);
     setMessage(null);
     try {
-      const res = await fetch(`${BASE_URL}/Get_AllDesktopInventory`);
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || 'Failed to fetch inventory.');
-      }
-      const data = await res.json();
-      if (data.success && Array.isArray(data.data)) {
-        setInventoryList(data.data);
+      const res = await axios.get(`${BASE_URL}/Get_AllDesktopInventory`);
+      if (res.data.success) {
+        setInventoryList(res.data.data || []);
       } else {
         setInventoryList([]);
-        setMessage(data.message || 'No desktop inventory records found.');
+        setMessage(res.data.message || "No desktop inventory records found.");
       }
     } catch (err) {
-      setError(err.message);
+      setError("Failed to fetch inventory.");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreate = async () => {
-    setError(null);
-    setMessage(null);
-    try {
-      const payload = { ...form };
-      // Generate a UUID for new items if ID is not provided (as per your backend API)
-      if (!payload.Inventory_Desktops_ID) {
-          payload.Inventory_Desktops_ID = uuidv4();
-      }
-
-      const res = await fetch(`${BASE_URL}/Create_DesktopInventory`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to create desktop inventory.');
-      }
-      fetchInventory(); // Refresh the list
-      setForm(initialFormState); // Reset form
-      setMessage('Desktop inventory item created successfully!');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleUpdate = async () => {
-    setError(null);
-    setMessage(null);
-    try {
-      // Your backend expects ID in URL params for update
-      const res = await fetch(`http://localhost:8000/api/Update_DesktopInventory/:${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to update desktop inventory.');
-      }
-      fetchInventory(); // Refresh the list
-      cancelEdit(); // Reset form and editing state
-      setMessage('Desktop inventory item updated successfully!');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this inventory item?")) return;
-
-    setError(null);
-    setMessage(null);
-    try {
-      const res = await fetch(`${BASE_URL}/Delete_DesktopInventory/:${id}`, {
-        method: 'DELETE',
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || 'Failed to delete desktop inventory.');
-      }
-      fetchInventory(); // Refresh the list
-      setMessage('Desktop inventory item deleted successfully!');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // --- Form & State Management ---
-
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // Handle number inputs
-    const newValue = (name === 'QTY_Recieved' || name === 'QTY_On_Hand') ? parseInt(value) || '' : value;
-    setForm((prev) => ({ ...prev, [name]: newValue }));
+    // convert quantities to numbers if possible
+    const val =
+      name === "QTY_Recieved" || name === "QTY_On_Hand"
+        ? value === ""
+          ? ""
+          : Number(value)
+        : value;
+    setForm((prev) => ({ ...prev, [name]: val }));
   };
 
-  const startEdit = (item) => {
+  const handleSubmit = async () => {
+    setError(null);
+    setMessage(null);
+    try {
+      let payload = { ...form };
+
+      if (!editingId) {
+        // Creating new item, generate ID
+        if (!payload.Inventory_Desktops_ID) {
+          payload.Inventory_Desktops_ID = uuidv4();
+        }
+        const res = await axios.post(
+          `${BASE_URL}/Create_DesktopInventory`,
+          payload
+        );
+        if (!res.data.success)
+          throw new Error(res.data.message || "Create failed");
+        setMessage("Desktop inventory item created successfully!");
+      } else {
+        // Updating existing
+        const res = await axios.put(
+          `${BASE_URL}/Update_DesktopInventory/${editingId}`,
+          payload
+        );
+        if (!res.data.success)
+          throw new Error(res.data.message || "Update failed");
+        setMessage("Desktop inventory item updated successfully!");
+      }
+
+      fetchInventory();
+      setForm(initialFormState);
+      setEditingId(null);
+    } catch (err) {
+      setError(err.message || "Error submitting data.");
+    }
+  };
+
+  const handleEdit = (item) => {
     setEditingId(item.Inventory_Desktops_ID);
-    // Set form state with item data, converting numbers to strings for input fields
     setForm({
       ...item,
-      QTY_Recieved: item.QTY_Recieved !== null ? String(item.QTY_Recieved) : '',
-      QTY_On_Hand: item.QTY_On_Hand !== null ? String(item.QTY_On_Hand) : '',
+      QTY_Recieved: item.QTY_Recieved || "",
+      QTY_On_Hand: item.QTY_On_Hand || "",
     });
-    setError(null); // Clear any previous errors
-    setMessage(null); // Clear any previous messages
+    setError(null);
+    setMessage(null);
   };
 
-  const cancelEdit = () => {
+  const handleCancelEdit = () => {
     setEditingId(null);
     setForm(initialFormState);
     setError(null);
     setMessage(null);
   };
 
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+
+    setError(null);
+    setMessage(null);
+    try {
+      const res = await axios.delete(
+        `${BASE_URL}/Delete_DesktopInventory/${id}`
+      );
+      if (!res.data.success)
+        throw new Error(res.data.message || "Delete failed");
+      setMessage("Desktop inventory item deleted successfully!");
+      fetchInventory();
+    } catch (err) {
+      setError(err.message || "Error deleting item.");
+    }
+  };
+
   return (
-    <div style={{ maxWidth: '1000px', margin: '2rem auto', padding: '1rem', fontFamily: 'Arial, sans-serif', border: '1px solid #ccc', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#333' }}>
-        {editingId ? 'Update Desktop Inventory' : 'Create New Desktop Inventory'}
-      </h2>
+    <Paper sx={{ p: 3, maxWidth: 1200, margin: "2rem auto" }}>
+      <Typography variant="h5" gutterBottom>
+        {editingId
+          ? "Update Desktop Inventory"
+          : "Create New Desktop Inventory"}
+      </Typography>
 
-      {/* Message and Error Display */}
-      {loading && <p style={{ color: '#007bff', textAlign: 'center' }}>Loading inventory...</p>}
-      {error && <p style={{ color: 'red', textAlign: 'center', fontWeight: 'bold' }}>Error: {error}</p>}
-      {message && <p style={{ color: 'green', textAlign: 'center', fontWeight: 'bold' }}>{message}</p>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {message && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {message}
+        </Alert>
+      )}
 
-      {/* Form Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem', padding: '1rem', border: '1px solid #eee', borderRadius: '5px', backgroundColor: '#f9f9f9' }}>
-        {Object.keys(initialFormState).map((field) => (
-          <div key={field}>
-            <label htmlFor={field} style={{ display: 'block', marginBottom: '0.2rem', fontWeight: 'bold', fontSize: '0.9rem' }}>
-              {field.replace(/_/g, ' ').replace('QTY', 'Quantity ')}:
-            </label>
-            <input
-              type={field.includes('QTY') ? 'number' : 'text'}
+      <Stack
+        direction="row"
+        spacing={3}
+        flexWrap="wrap"
+        rowGap={3}
+        columnGap={3}
+        sx={{ mb: 4 }}
+      >
+        {Object.keys(initialFormState).map((field) => {
+          const label = field.replace(/_/g, " ").replace("QTY", "Quantity");
+          const isNumberField =
+            field === "QTY_Recieved" || field === "QTY_On_Hand";
+          return (
+            <TextField
+              key={field}
+              label={label}
               name={field}
-              id={field}
-              value={form[field] || ''}
+              value={form[field]}
+              type={isNumberField ? "number" : "text"}
               onChange={handleChange}
-              disabled={field === 'Inventory_Desktops_ID' && editingId !== null} // Disable ID field when editing
-              style={{ width: 'calc(100% - 16px)', padding: '8px', border: '1px solid #ddd', borderRadius: '4px', boxSizing: 'border-box' }}
+              disabled={field === "Inventory_Desktops_ID" && editingId !== null}
+              sx={{ flex: "1 1 220px", minWidth: 200 }}
+              size="small"
             />
-            {field === 'Inventory_Desktops_ID' && !editingId && (
-              <small style={{ display: 'block', fontSize: '0.75rem', color: '#666', marginTop: '0.2rem' }}>
-                A new ID will be generated for new entries.
-              </small>
-            )}
-          </div>
-        ))}
-      </div>
-      <div style={{ textAlign: 'right', marginBottom: '3rem' }}>
-        <button
-          onClick={editingId ? handleUpdate : handleCreate}
-          style={{
-            padding: '10px 20px',
-            marginRight: '10px',
-            backgroundColor: editingId ? '#28a745' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontSize: '1rem',
-          }}
-        >
-          {editingId ? 'Update Inventory' : 'Create Inventory'}
-        </button>
+          );
+        })}
+      </Stack>
+
+      <Stack direction="row" spacing={2} justifyContent="flex-end" mb={4}>
         {editingId && (
-          <button
-            onClick={cancelEdit}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-              fontSize: '1rem',
-            }}
-          >
+          <Button variant="outlined" color="error" onClick={handleCancelEdit}>
             Cancel Edit
-          </button>
+          </Button>
         )}
-      </div>
+        <Button variant="contained" onClick={handleSubmit}>
+          {editingId ? "Update Inventory" : "Create Inventory"}
+        </Button>
+      </Stack>
 
-      <hr style={{ margin: '2rem 0', border: '0', borderTop: '1px solid #eee' }} />
+      <Typography variant="h6" gutterBottom>
+        Desktop Inventory List
+      </Typography>
 
-      <h2 style={{ textAlign: 'center', marginBottom: '1.5rem', color: '#333' }}>Desktop Inventory List</h2>
-
-      {/* Inventory List Table */}
-      {loading && inventoryList.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#007bff' }}>Loading inventory...</p>
+      {loading ? (
+        <Stack alignItems="center" my={3}>
+          <CircularProgress />
+        </Stack>
       ) : inventoryList.length === 0 ? (
-        <p style={{ textAlign: 'center', color: '#666' }}>No desktop inventory records found.</p>
+        <Typography>No desktop inventory records found.</Typography>
       ) : (
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem', fontSize: '0.9rem' }}>
-            <thead>
-              <tr style={{ backgroundColor: '#f0f0f0', borderBottom: '2px solid #ddd' }}>
+        <TableContainer component={Paper}>
+          <Table size="small" aria-label="desktop inventory table">
+            <TableHead>
+              <TableRow>
                 {Object.keys(initialFormState).map((header) => (
-                  <th key={header} style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'left' }}>
-                    {header.replace(/_/g, ' ').replace('QTY', 'Quantity ')}
-                  </th>
+                  <TableCell key={header}>
+                    {header.replace(/_/g, " ").replace("QTY", "Quantity")}
+                  </TableCell>
                 ))}
-                <th style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'center' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
+                <TableCell align="center">Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {inventoryList.map((item) => (
-                <tr key={item.Inventory_Desktops_ID} style={{ borderBottom: '1px solid #eee' }}>
+                <TableRow key={item.Inventory_Desktops_ID}>
                   {Object.keys(initialFormState).map((field) => (
-                    <td key={field} style={{ padding: '10px', border: '1px solid #ddd' }}>
-                      {item[field]}
-                    </td>
+                    <TableCell key={field}>{item[field]}</TableCell>
                   ))}
-                  <td style={{ padding: '10px', border: '1px solid #ddd', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                    <button
-                      onClick={() => startEdit(item)}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: '#ffc107',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        marginRight: '8px',
-                      }}
+                  <TableCell align="center">
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ mr: 1 }}
+                      onClick={() => handleEdit(item)}
                     >
                       Edit
-                    </button>
-                    <button
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      color="error"
                       onClick={() => handleDelete(item.Inventory_Desktops_ID)}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: '#dc3545',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                      }}
                     >
                       Delete
-                    </button>
-                  </td>
-                </tr>
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </TableBody>
+          </Table>
+        </TableContainer>
       )}
-    </div>
+    </Paper>
   );
 };
 

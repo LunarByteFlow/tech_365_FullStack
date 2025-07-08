@@ -41,8 +41,10 @@ const config = {
 // Function to connect to the database
 const connectDB = async () => {
   try {
+    const pool = await sql.connect(config)
     await sql.connect(config);
     console.log('Connected to SQL Server!');
+    return pool;
   } catch (error) {
     console.error('Error connecting to SQL Server:', error);
     throw error;  // Throw error to be handled by the caller

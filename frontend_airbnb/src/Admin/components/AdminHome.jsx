@@ -14,12 +14,21 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import HistoryIcon from "@mui/icons-material/History";
 import SettingsIcon from "@mui/icons-material/Settings";
+import DisplayOrders from "../../Guest/pages/DisplayOrders";
+import OrderReturns from "./OrderReturns.jsx";
+import InventoryParts from "./InventoryParts.jsx";
+import InventoryLaptop from "./InventoryLaptop.jsx";
+import InventoryDesktops from "./InventoryDesktops.jsx";
+import InventoryScreens from "./InventoryScreens.jsx";
+import PrebuiltDesktops from "./PrebuiltDesktops.jsx";
+import PrebuiltLaptops from "./PrebuiltLaptops.jsx";
+import InventoryUploader from "./InventoryUploader.jsx";
 
 const AdminHome = () => {
   return (
     <>
       <AdminNavbar />
-      <Container maxWidth="lg" sx={{ mt: 10,mb:20 }}>
+      <Container maxWidth="lg" sx={{ mt: 10, mb: 20 }}>
         <Box textAlign="center" mb={5}>
           <Typography variant="h4" fontWeight="bold" gutterBottom>
             Welcome to the Admin Panel
@@ -47,6 +56,46 @@ const AdminHome = () => {
             </Paper>
           </Grid>
 
+          <Grid item xs={12}>
+            <InventoryUploader />
+          </Grid>
+
+          <Grid item xs={12}>
+            <DisplayOrders />
+          </Grid>
+
+          {/* Order Returns */}
+          <Grid item xs={12}>
+            <OrderReturns />
+          </Grid>
+
+          {/* Inventory Parts */}
+          <Grid item xs={12}>
+            <InventoryParts />
+          </Grid>
+
+          {/* Inventory Laptops */}
+          <Grid item xs={12}>
+            <InventoryLaptop />
+          </Grid>
+
+          {/* Inventory Desktops */}
+          <Grid item xs={12}>
+            <InventoryDesktops />
+          </Grid>
+
+          {/* Inventory Screens */}
+          <Grid item xs={12}>
+            <InventoryScreens />
+          </Grid>
+
+          <Grid item xs={12}>
+            <PrebuiltDesktops />
+          </Grid>
+
+          <Grid item xs={12}>
+            <PrebuiltLaptops />
+          </Grid>
           {/* User Management */}
           <Grid item xs={12} md={6}>
             <Paper elevation={4} sx={{ p: 3, borderRadius: 3 }}>
@@ -60,6 +109,8 @@ const AdminHome = () => {
               <LowStockTable />
             </Paper>
           </Grid>
+          {/* Display Orders */}
+          {/* Each of these components needs to be wrapped in a Grid item */}
         </Grid>
       </Container>
     </>

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import {
   Paper, Typography, Button, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, TextField, Grid
+  TableContainer, TableHead, TableRow, TextField, Grid, Collapse
 } from '@mui/material';
 
 const InventoryLaptop = () => {
   const [laptops, setLaptops] = useState([]);
   const [editingLaptop, setEditingLaptop] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
   const [formData, setFormData] = useState({
     Inventory_Laptops_ID: '',
     Facility: '',
@@ -23,7 +25,8 @@ const InventoryLaptop = () => {
     QTY_Recieved: '',
     QTY_On_Hand: ''
   });
-  const BASE_URL= "http://10.2.0.2:8000/api";
+
+  const BASE_URL = "http://10.2.0.2:8000/api";
 
   const generateID = () => 'LAP-' + Date.now();
 
@@ -32,7 +35,7 @@ const InventoryLaptop = () => {
       const res = await axios.get(`${BASE_URL}/Get_AllLaptopInventory`);
       setLaptops(res.data.data || []);
     } catch (error) {
-      console.error(error);
+      console.error("Fetch error:", error);
     }
   };
 
@@ -42,21 +45,23 @@ const InventoryLaptop = () => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`http://localhost:8000/api/Delete_LaptopInventory/${id}`);
+      await axios.delete(`${BASE_URL}/Delete_LaptopInventory/${id}`);
       fetchLaptops();
     } catch (error) {
-      console.error(error);
+      console.error("Delete error:", error);
     }
   };
 
   const handleEdit = (laptop) => {
     setEditingLaptop(laptop);
     setFormData({ ...laptop });
+    setShowForm(true);
   };
 
   const handleCancel = () => {
     setEditingLaptop(null);
     resetForm();
+    setShowForm(false);
   };
 
   const resetForm = () => {
@@ -85,17 +90,14 @@ const InventoryLaptop = () => {
   const handleSubmit = async () => {
     try {
       if (editingLaptop) {
-        await axios.put(
-          `http://localhost:8000/api/Update_LaptopInventory/${editingLaptop.Inventory_Laptops_ID}`,
-          formData
-        );
+        await axios.put(`${BASE_URL}/Update_LaptopInventory/${editingLaptop.Inventory_Laptops_ID}`, formData);
       } else {
-        await axios.post('http://localhost:8000/api/Create_LaptopInventory', formData);
+        await axios.post(`${BASE_URL}/Create_LaptopInventory`, formData);
       }
       fetchLaptops();
       handleCancel();
     } catch (error) {
-      console.error(error);
+      console.error("Submit error:", error);
     }
   };
 
@@ -105,35 +107,48 @@ const InventoryLaptop = () => {
         Laptop Inventory Manager
       </Typography>
 
-      {/* Form Section */}
-      <Typography variant="h6" sx={{ mt: 3 }}>
-        {editingLaptop ? 'Edit Laptop' : 'Add New Laptop'}
-      </Typography>
-      <Grid container spacing={2} sx={{ mb: 2 }}>
-        {Object.entries(formData).map(([key, value]) => (
-          <Grid item xs={12} sm={6} key={key}>
-            <TextField
-              label={key}
-              name={key}
-              fullWidth
-              value={value}
-              onChange={handleChange}
-              disabled={key === 'Inventory_Laptops_ID' && editingLaptop}
-            />
-          </Grid>
-        ))}
-      </Grid>
-      <Button variant="contained" onClick={handleSubmit} sx={{ mr: 1 }}>
-        {editingLaptop ? 'Update' : 'Create'}
+      <Button
+        variant="contained"
+        onClick={() => {
+          resetForm();
+          setShowForm(true);
+        }}
+        sx={{ mb: 2 }}
+      >
+        + Add New Laptop
       </Button>
-      {editingLaptop && (
-        <Button variant="outlined" color="secondary" onClick={handleCancel}>
-          Cancel
-        </Button>
-      )}
+
+      {/* Conditional Form */}
+      <Collapse in={showForm}>
+        <Paper sx={{ padding: 2, mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            {editingLaptop ? 'Edit Laptop' : 'Add New Laptop'}
+          </Typography>
+          <Grid container spacing={2}>
+            {Object.entries(formData).map(([key, value]) => (
+              <Grid item xs={12} sm={6} key={key}>
+                <TextField
+                  label={key.replace(/_/g, ' ')}
+                  name={key}
+                  fullWidth
+                  value={value}
+                  onChange={handleChange}
+                  disabled={key === 'Inventory_Laptops_ID' && editingLaptop}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2, mr: 1 }}>
+            {editingLaptop ? 'Update' : 'Create'}
+          </Button>
+          <Button variant="outlined" onClick={handleCancel} sx={{ mt: 2 }}>
+            Cancel
+          </Button>
+        </Paper>
+      </Collapse>
 
       {/* Table Section */}
-      <Typography variant="h6" sx={{ mt: 5 }}>
+      <Typography variant="h6" sx={{ mt: 3 }}>
         Inventory List
       </Typography>
       <TableContainer component={Paper}>
