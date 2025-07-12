@@ -23,6 +23,7 @@ import InventoryScreens from "./InventoryScreens.jsx";
 import PrebuiltDesktops from "./PrebuiltDesktops.jsx";
 import PrebuiltLaptops from "./PrebuiltLaptops.jsx";
 import InventoryUploader from "./InventoryUploader.jsx";
+import InventoryAO from "./InventoryAO.jsx";
 
 const AdminHome = () => {
   return (
@@ -68,27 +69,6 @@ const AdminHome = () => {
           <Grid item xs={12}>
             <OrderReturns />
           </Grid>
-
-          {/* Inventory Parts */}
-          <Grid item xs={12}>
-            <InventoryParts />
-          </Grid>
-
-          {/* Inventory Laptops */}
-          <Grid item xs={12}>
-            <InventoryLaptop />
-          </Grid>
-
-          {/* Inventory Desktops */}
-          <Grid item xs={12}>
-            <InventoryDesktops />
-          </Grid>
-
-          {/* Inventory Screens */}
-          <Grid item xs={12}>
-            <InventoryScreens />
-          </Grid>
-
           <Grid item xs={12}>
             <PrebuiltDesktops />
           </Grid>
@@ -96,6 +76,31 @@ const AdminHome = () => {
           <Grid item xs={12}>
             <PrebuiltLaptops />
           </Grid>
+
+          {/* Inventory Desktops */}
+          <Grid item xs={12}>
+            <InventoryDesktops />
+          </Grid>
+          {/* Inventory Laptops */}
+          <Grid item xs={12}>
+            <InventoryLaptop />
+          </Grid>
+          {/* Inventory Screens */}
+          <Grid item xs={12}>
+            <InventoryScreens />
+          </Grid>
+          {/* Inventory Screens */}
+          <Grid item xs={12}>
+            <InventoryAO />
+          </Grid>
+          {/* Inventory Parts */}
+          <Grid item xs={12}>
+            <InventoryParts />
+          </Grid>
+
+
+
+
           {/* User Management */}
           <Grid item xs={12} md={6}>
             <Paper elevation={4} sx={{ p: 3, borderRadius: 3 }}>

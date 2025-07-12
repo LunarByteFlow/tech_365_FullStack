@@ -4,7 +4,6 @@ const sql = require("mssql");
 // CREATE
 const Create_Inventory = async (req, res) => {
   const {
-    InventoryAO_ID,
     Facility,
     Location_,
     Brand,
@@ -18,16 +17,16 @@ const Create_Inventory = async (req, res) => {
     QTY_On_Hand
   } = req.body;
 
-  if (!InventoryAO_ID || !Brand || !Model) {
-    return res.status(400).json({ message: "Missing required fields" });
-  }
+  // if (!InventoryAO_ID || !Brand || !Model) {
+  //   return res.status(400).json({ message: "Missing required fields" });
+  // }
 
   try {
     await connectDB();
     const request = new sql.Request();
 
     await request
-      .input("InventoryAO_ID", sql.VarChar, InventoryAO_ID)
+      // .input("InventoryAO_ID", sql.VarChar, InventoryAO_ID)
       .input("Facility", sql.VarChar, Facility)
       .input("Location_", sql.VarChar, Location_)
       .input("Brand", sql.VarChar, Brand)
@@ -40,10 +39,10 @@ const Create_Inventory = async (req, res) => {
       .input("QTY_Recieved", sql.Int, QTY_Recieved)
       .input("QTY_On_Hand", sql.Int, QTY_On_Hand)
       .query(`INSERT INTO [Inventory_AO] (
-        InventoryAO_ID, Facility, Location_, Brand, Model, Screen_Size, Processor,
+         Facility, Location_, Brand, Model, Screen_Size, Processor,
         RAM, Hard_Drive, Stand, QTY_Recieved, QTY_On_Hand
       ) VALUES (
-        @InventoryAO_ID, @Facility, @Location_, @Brand, @Model, @Screen_Size, @Processor,
+        @Facility, @Location_, @Brand, @Model, @Screen_Size, @Processor,
         @RAM, @Hard_Drive, @Stand, @QTY_Recieved, @QTY_On_Hand
       )`);
 

@@ -20,7 +20,6 @@ import { v4 as uuidv4 } from "uuid";
 const BASE_URL = "http://10.2.0.2:8000/api";
 
 const initialFormState = {
-  Inventory_Desktops_ID: "",
   Facility: "",
   Location_: "",
   Brand: "",
@@ -36,12 +35,12 @@ const initialFormState = {
 const InventoryDesktops = () => {
   const [inventoryList, setInventoryList] = useState([]);
   const [form, setForm] = useState(initialFormState);
+  const [filters, setFilters] = useState(initialFormState);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
-  // Fetch inventory on mount
   useEffect(() => {
     fetchInventory();
   }, []);
@@ -67,7 +66,6 @@ const InventoryDesktops = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    // convert quantities to numbers if possible
     const val =
       name === "QTY_Recieved" || name === "QTY_On_Hand"
         ? value === ""
@@ -84,10 +82,7 @@ const InventoryDesktops = () => {
       let payload = { ...form };
 
       if (!editingId) {
-        // Creating new item, generate ID
-        if (!payload.Inventory_Desktops_ID) {
-          payload.Inventory_Desktops_ID = uuidv4();
-        }
+        payload.Inventory_Desktops_ID = uuidv4();
         const res = await axios.post(
           `${BASE_URL}/Create_DesktopInventory`,
           payload
@@ -96,7 +91,6 @@ const InventoryDesktops = () => {
           throw new Error(res.data.message || "Create failed");
         setMessage("Desktop inventory item created successfully!");
       } else {
-        // Updating existing
         const res = await axios.put(
           `${BASE_URL}/Update_DesktopInventory/${editingId}`,
           payload
@@ -149,6 +143,21 @@ const InventoryDesktops = () => {
       setError(err.message || "Error deleting item.");
     }
   };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const filteredInventoryList = inventoryList.filter((item) =>
+    Object.keys(filters).every((key) => {
+      if (filters[key] === "") return true;
+      return item[key]
+        ?.toString()
+        .toLowerCase()
+        .includes(filters[key].toString().toLowerCase());
+    })
+  );
 
   return (
     <Paper sx={{ p: 3, maxWidth: 1200, margin: "2rem auto" }}>
@@ -209,6 +218,34 @@ const InventoryDesktops = () => {
       </Stack>
 
       <Typography variant="h6" gutterBottom>
+        Filter Desktop Inventory
+      </Typography>
+
+      <Stack
+        direction="row"
+        spacing={3}
+        flexWrap="wrap"
+        rowGap={2}
+        columnGap={3}
+        sx={{ mb: 4 }}
+      >
+        {Object.keys(initialFormState).map((field) => {
+          const label = field.replace(/_/g, " ").replace("QTY", "Quantity");
+          return (
+            <TextField
+              key={field}
+              label={`Filter by ${label}`}
+              name={field}
+              value={filters[field]}
+              onChange={handleFilterChange}
+              sx={{ flex: "1 1 200px", minWidth: 180 }}
+              size="small"
+            />
+          );
+        })}
+      </Stack>
+
+      <Typography variant="h6" gutterBottom>
         Desktop Inventory List
       </Typography>
 
@@ -216,7 +253,7 @@ const InventoryDesktops = () => {
         <Stack alignItems="center" my={3}>
           <CircularProgress />
         </Stack>
-      ) : inventoryList.length === 0 ? (
+      ) : filteredInventoryList.length === 0 ? (
         <Typography>No desktop inventory records found.</Typography>
       ) : (
         <TableContainer component={Paper}>
@@ -232,7 +269,7 @@ const InventoryDesktops = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {inventoryList.map((item) => (
+              {filteredInventoryList.map((item) => (
                 <TableRow key={item.Inventory_Desktops_ID}>
                   {Object.keys(initialFormState).map((field) => (
                     <TableCell key={field}>{item[field]}</TableCell>

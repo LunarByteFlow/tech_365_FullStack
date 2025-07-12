@@ -10,7 +10,7 @@ const {Create_PartInventory,
 router.post("/Create_PartInventory", Create_PartInventory);
 router.get("/Get_AllPartInventory", Get_AllPartInventory);
 router.get("/Get_PartInventoryById/:id", Get_PartInventoryById);
-router.put("/Update_PartInventory", Update_PartInventory);
+router.put("/Update_PartInventory/:id", Update_PartInventory);
 router.delete("/Delete_PartInventory/:id", Delete_PartInventory);
 
 module.exports = router;

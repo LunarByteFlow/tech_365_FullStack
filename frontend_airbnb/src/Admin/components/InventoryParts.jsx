@@ -1,9 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
-  Paper, Typography, Button, Table, TableBody, TableCell,
-  TableContainer, TableHead, TableRow, TextField, Grid, Collapse
-} from '@mui/material';
+  Paper,
+  Typography,
+  Button,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Grid,
+  Collapse,
+} from "@mui/material";
 
 const InventoryParts = () => {
   const BASE_URL = "http://10.2.0.2:8000/api";
@@ -13,18 +23,18 @@ const InventoryParts = () => {
   const [showForm, setShowForm] = useState(false); // 👈 NEW STATE
 
   const [formData, setFormData] = useState({
-    Inventory_Parts_ID: '',
-    Facility: '',
-    Location_: '',
-    Brand: '',
-    Model: '',
-    Type_: '',
-    Comments: '',
-    QTY_Recieved: '',
-    QTY_On_Hand: ''
+    id: "",
+    Facility: "",
+    Location_: "",
+    Brand: "",
+    Model: "",
+    Type_: "",
+    Comments: "",
+    QTY_Recieved: "",
+    QTY_On_Hand: "",
   });
 
-  const generateID = () => 'PART-' + Date.now();
+  const generateID = () => "PART-" + Date.now();
 
   const fetchParts = async () => {
     try {
@@ -62,15 +72,14 @@ const InventoryParts = () => {
 
   const resetForm = () => {
     setFormData({
-      Inventory_Parts_ID: generateID(),
-      Facility: '',
-      Location_: '',
-      Brand: '',
-      Model: '',
-      Type_: '',
-      Comments: '',
-      QTY_Recieved: '',
-      QTY_On_Hand: ''
+      Facility: "",
+      Location_: "",
+      Brand: "",
+      Model: "",
+      Type_: "",
+      Comments: "",
+      QTY_Recieved: "",
+      QTY_On_Hand: "",
     });
   };
 
@@ -82,7 +91,10 @@ const InventoryParts = () => {
   const handleSubmit = async () => {
     try {
       if (editingPart) {
-        await axios.put(`${BASE_URL}/Update_PartInventory/${editingPart.Inventory_Parts_ID}`, formData);
+        await axios.put(
+          `${BASE_URL}/Update_PartInventory/${editingPart.id}`,
+          formData
+        );
       } else {
         await axios.post(`${BASE_URL}/Create_PartInventory`, formData);
       }
@@ -114,24 +126,28 @@ const InventoryParts = () => {
       <Collapse in={showForm}>
         <Paper sx={{ padding: 2, mb: 3 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>
-            {editingPart ? 'Edit Part' : 'Add New Part'}
+            {editingPart ? "Edit Part" : "Add New Part"}
           </Typography>
           <Grid container spacing={2}>
             {Object.entries(formData).map(([key, value]) => (
               <Grid item xs={12} sm={6} key={key}>
                 <TextField
-                  label={key.replace(/_/g, ' ')}
+                  label={key.replace(/_/g, " ")}
                   name={key}
                   fullWidth
                   value={value}
                   onChange={handleChange}
-                  disabled={key === 'Inventory_Parts_ID' && editingPart}
+                  disabled={key === "id" && editingPart}
                 />
               </Grid>
             ))}
           </Grid>
-          <Button variant="contained" onClick={handleSubmit} sx={{ mt: 2, mr: 1 }}>
-            {editingPart ? 'Update' : 'Create'}
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            sx={{ mt: 2, mr: 1 }}
+          >
+            {editingPart ? "Update" : "Create"}
           </Button>
           <Button variant="outlined" onClick={handleCancel} sx={{ mt: 2 }}>
             Cancel
@@ -148,6 +164,8 @@ const InventoryParts = () => {
           <TableHead>
             <TableRow>
               <TableCell>ID</TableCell>
+              <TableCell>Facility</TableCell>
+
               <TableCell>Brand</TableCell>
               <TableCell>Model</TableCell>
               <TableCell>Location</TableCell>
@@ -158,22 +176,29 @@ const InventoryParts = () => {
           </TableHead>
           <TableBody>
             {parts.map((part) => (
-              <TableRow key={part.Inventory_Parts_ID}>
-                <TableCell>{part.Inventory_Parts_ID}</TableCell>
+              <TableRow key={part.id}>
+                <TableCell>{part.id}</TableCell>
+                <TableCell>{part.Facility}</TableCell>
+
                 <TableCell>{part.Brand}</TableCell>
                 <TableCell>{part.Model}</TableCell>
                 <TableCell>{part.Location_}</TableCell>
                 <TableCell>{part.Type_}</TableCell>
                 <TableCell>{part.QTY_On_Hand}</TableCell>
                 <TableCell>
-                  <Button variant="outlined" size="small" onClick={() => handleEdit(part)} sx={{ mr: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => handleEdit(part)}
+                    sx={{ mr: 1 }}
+                  >
                     Edit
                   </Button>
                   <Button
                     variant="outlined"
                     size="small"
                     color="error"
-                    onClick={() => handleDelete(part.Inventory_Parts_ID)}
+                    onClick={() => handleDelete(part.id)}
                   >
                     Delete
                   </Button>
