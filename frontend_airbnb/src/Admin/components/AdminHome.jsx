@@ -98,9 +98,6 @@ const AdminHome = () => {
             <InventoryParts />
           </Grid>
 
-
-
-
           {/* User Management */}
           <Grid item xs={12} md={6}>
             <Paper elevation={4} sx={{ p: 3, borderRadius: 3 }}>

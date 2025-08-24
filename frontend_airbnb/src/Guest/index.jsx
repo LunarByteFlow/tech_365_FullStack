@@ -30,7 +30,6 @@ export default function Guest() {
         <Route path="/inventory/*" element={<Inventory />} />
         <Route path="/technician/*" element={<Technician />} />
         <Route path="/product_finish/*" element={<ProductFinish />} />
-
         <Route path="/" element={<GuestHome />} />
         <Route path="/AddOrder" element={<AddNewOrder />} />
         <Route path="*" element={<Navigate to="/" replace={true} />} />

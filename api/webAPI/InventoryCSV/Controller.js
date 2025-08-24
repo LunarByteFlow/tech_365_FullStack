@@ -105,17 +105,22 @@ const UploadInventoryCSV = async (req, res) => {
 // }
 
 function determineTableType(row) {
+  const keys = Object.keys(row);
+  console.log("Row keys:", keys); // Debugging
+  console.log("Raw Stock Type:", row["Stock Type"]);
+
   if (!row["Stock Type"]) return null;
 
-  const stockType = row["Stock Type"].toLowerCase();
+  const stockType = row["Stock Type"].trim().toLowerCase();
+  console.log("Cleaned Stock Type:", stockType);
 
   if (stockType === "aio") return "AIO";
-  if (stockType === "laptops") return "Laptops";
-  if (stockType === "desktops") return "Desktops";
-  if (stockType === "parts") return "Parts";
-  if (stockType === "screens") return "Screens";
+  if (stockType === "laptop") return "Laptop";
+  if (stockType === "desktop") return "Desktop";
+  if (stockType === "part") return "Part";
+  if (stockType === "screen") return "Screen";
 
-  return null; // Unknown type
+  return null;
 }
 
 
@@ -159,7 +164,7 @@ function buildInsertQuery(table, row) {
         ],
       };
 
-    case "Laptops":
+    case "Laptop":
       return {
         query: `INSERT INTO Inventory_Laptops (
           Facility, Location_, Brand, Model, Desk_Type,
@@ -196,7 +201,7 @@ function buildInsertQuery(table, row) {
         ],
       };
 
-    case "Desktops":
+    case "Desktop":
       return {
         query: `INSERT INTO Inventory_Desktops (
           Facility, Location_, Brand, Model, Type_,
@@ -227,7 +232,7 @@ function buildInsertQuery(table, row) {
         ],
       };
 
-    case "Parts":
+    case "Part":
       return {
         query: `INSERT INTO Inventory_Parts (
           Facility, Location_, Brand, Model, Type_,
@@ -256,7 +261,7 @@ function buildInsertQuery(table, row) {
         ],
       };
 
-    case "Screens":
+    case "Screen":
       return {
         query: `INSERT INTO Inventory_Screens (
           Facility, Location_, Brand, Model, Screen_Size,

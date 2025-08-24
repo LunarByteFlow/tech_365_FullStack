@@ -10,6 +10,7 @@ const sql = require("mssql");
 const config = {
   // Explicitly define the server name as a string (REQUIRED by Tedious)
   server: "LAPTOP-KU2OGEKV", // Your SQL Server name or IP address
+  // server: "SQLSSMS",
 
   // Database name (REQUIRED)
   database: "tech_365",
@@ -18,6 +19,9 @@ const config = {
   user: "sa", // Your SQL Server username
   password: "sa", // Your SQL Server password
 
+
+  // user: "administrator", // Your SQL Server username
+  // password: "t3ch365!!)", // Your SQL Server password
   // Connection options
   options: {
     // Set to true if your SQL Server requires SSL (e.g., Azure SQL).

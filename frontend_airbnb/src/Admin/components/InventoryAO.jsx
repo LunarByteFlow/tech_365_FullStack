@@ -26,7 +26,7 @@ const BASE_URL = "http://10.2.0.2:8000/api";
 const InventoryAO = () => {
   const initialFormState = {
     Facility: "",
-    Location: "",
+    Location_: "",
     Brand: "",
     Model: "",
     Screen_Size: "",
@@ -34,8 +34,8 @@ const InventoryAO = () => {
     RAM: "",
     Hard_Drive: "",
     Stand: "",
-    QTY_Received: "",
-    QTY_on_Hand: "",
+    QTY_Recieved: "",
+    QTY_On_Hand: "",
   };
 
   const [form, setForm] = useState(initialFormState);
@@ -293,7 +293,7 @@ const InventoryAO = () => {
 
       {/* Filter UI */}
       <Grid container spacing={2} mb={2}>
-        {["Facility", "Location", "Brand", "Model","Screen_Size","Processor",'RAM',"Hard_Drive","Stand","QTY_Received","QTY_On_Hand"].map((filterKey) => (
+        {["Facility", "Location_", "Brand", "Model","Screen_Size","Processor",'RAM',"Hard_Drive","Stand","QTY_Recieved","QTY_On_Hand"].map((filterKey) => (
           <Grid item xs={12} sm={6} md={3} key={filterKey}>
             <TextField
               fullWidth

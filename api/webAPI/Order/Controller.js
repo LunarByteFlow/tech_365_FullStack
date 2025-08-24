@@ -34,9 +34,9 @@ const Upload_CSV = async (req, res) => {
 
     for (const row of results) {
       // Validate required fields
-      if (!row.OrderNo || !row.Model || !row.Brand || !row.SERIALNo) {
-        continue; // Skip rows with missing required fields
-      }
+      // if (!row.OrderNo || !row.Model || !row.Brand || !row.SERIALNo) {
+      //   continue; // Skip rows with missing required fields
+      // }
 
       try {
         const requestCheck = new sql.Request();

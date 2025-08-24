@@ -100,10 +100,8 @@ const AdminNavbar = () => {
 
   const navLinks = [
     { text: "Create New User", to: "register" },
-    { text: "Add New Product", to: "postAnOrder" },
-    { text: "Dispatch", to: "Get_Dispatch" },
     { text: "Orders", to: "Get_Orders" },
-    { text: "Laptop Inventorry", to: "prebuilt_laptops" },
+    { text: "Laptop Inventory", to: "prebuilt_laptops" },
     { text: "Desktop Inventory", to: "prebuilt_desktops" },
     { text: "Parts Inventory", to: "prebuilt_parts" },
     { text: "Screens Inventory", to: "prebuilt_screens" },
@@ -112,6 +110,7 @@ const AdminNavbar = () => {
     { text: "Download Monthly CSV reports", to: "download_csv" },
     { text: "InventoryUploader", to: "InventoryUploader" },
     { text: "CombinedOrders", to: "CombinedOrders" },
+    { text: "Dispatch", to: "Get_Dispatch" },
 
   ];
 

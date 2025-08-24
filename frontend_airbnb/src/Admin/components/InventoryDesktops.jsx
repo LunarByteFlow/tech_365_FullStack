@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 
-const BASE_URL = "http://10.2.0.2:8000/api";
+const BASE_URL = "http://192.168.0.50:8000/api";
 
 const initialFormState = {
   Facility: "",
