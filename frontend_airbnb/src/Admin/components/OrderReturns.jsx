@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 // const BASE_URL = "http://localhost:8000/api"; // Change to your backend URL
+import { supabase } from "../../supabase/SupabaseClient"; // <-- Import your Supabase client
 const BASE_URL= "http://10.2.0.2:8000/api";
 
 function ReturnsApp() {
@@ -24,20 +25,38 @@ function ReturnsApp() {
   const [error, setError] = useState("");
 
   // Fetch all returns
-  const fetchReturns = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(BASE_URL);
-      setReturns(res.data.data);
-      setError("");
-    } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch returns");
-    }
-    setLoading(false);
-  };
+  // const fetchReturns = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await axios.get(BASE_URL);
+  //     setReturns(res.data.data);
+  //     setError("");
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Failed to fetch returns");
+  //   }
+  //   setLoading(false);
+  // };
 
+
+  const fetch_Order_Returns = async () => {
+      setLoading(true);
+      try {
+        // Supabase: SELECT * FROM your_table_name
+        // Replace 'your_table_name' with your actual Supabase table name.
+        const { data, error } = await supabase.from("Order_Returns").select("*");
+        if (error) {
+          throw new Error(error.message);
+        }
+        setReturns(data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to fetch orders");
+      } finally {
+        setLoading(false);
+      }
+    };
   useEffect(() => {
-    fetchReturns();
+    fetch_Order_Returns();
   }, []);
 
   // Handle input changes for form
@@ -91,7 +110,7 @@ function ReturnsApp() {
       });
       setSelectedReturn(null);
       setIsEditing(false);
-      fetchReturns();
+      fetch_Order_Returns();
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to save return record");
@@ -122,7 +141,7 @@ function ReturnsApp() {
           Process: "",
         });
       }
-      fetchReturns();
+      fetch_Order_Returns();
       setError("");
     } catch (err) {
       setError(err.response?.data?.message || "Failed to delete return record");

@@ -16,7 +16,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
-
+import { supabase } from "../../supabase/SupabaseClient";
 const BASE_URL = "http://10.2.0.2:8000/api";
 
 const initialFormState = {
@@ -40,28 +40,50 @@ const InventoryScreens = () => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
-  useEffect(() => {
-    fetchScreens();
-  }, []);
+  // useEffect(() => {
+  //   fetch_Inventory_Screens();
+  // }, []);
 
-  const fetchScreens = async () => {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-    try {
-      const res = await axios.get(`${BASE_URL}/Get_AllInventoryScreens`);
-      if (res.data.success) {
-        setScreens(res.data.data || []);
-      } else {
-        setScreens([]);
-        setMessage(res.data.message || "No screens found.");
+  // const fetch_Inventory_Screens = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   setMessage(null);
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/Get_AllInventoryScreens`);
+  //     if (res.data.success) {
+  //       setScreens(res.data.data || []);
+  //     } else {
+  //       setScreens([]);
+  //       setMessage(res.data.message || "No screens found.");
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to fetch screens.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const fetch_Inventory_Screens = async () => {
+      setLoading(true);
+      try {
+        // Supabase: SELECT * FROM your_table_name
+        // Replace 'your_table_name' with your actual Supabase table name.
+        const { data, error } = await supabase.from("OrderSheet").select("*");
+        if (error) {
+          throw new Error(error.message);
+        }
+        setScreens(data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to fetch orders");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError("Failed to fetch screens.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+  
+    useEffect(() => {
+      fetch_Inventory_Screens();
+    }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -97,7 +119,7 @@ const InventoryScreens = () => {
         setMessage("Screen updated successfully!");
       }
 
-      fetchScreens();
+      fetch_Inventory_Screens();
       setForm(initialFormState);
       setEditingId(null);
     } catch (err) {
@@ -131,7 +153,7 @@ const InventoryScreens = () => {
       if (!res.data.success)
         throw new Error(res.data.message || "Delete failed");
       setMessage("Screen deleted successfully!");
-      fetchScreens();
+      fetch_Inventory_Screens();
     } catch (err) {
       setError(err.message || "Error deleting screen.");
     }

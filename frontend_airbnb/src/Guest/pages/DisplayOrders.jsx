@@ -355,6 +355,7 @@ const initialFormState = {
   PostCode: "",
   DispatchDate: "",
   Prebuilt_Or_Inventory: "",
+  OrderSheet_ID:""
 };
 
 const DisplayOrders = () => {

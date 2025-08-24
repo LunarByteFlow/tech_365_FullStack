@@ -14,14 +14,15 @@ import {
   Grid,
   Collapse,
 } from "@mui/material";
-
+import { supabase } from "../../supabase/SupabaseClient";
 const InventoryParts = () => {
   const BASE_URL = "http://10.2.0.2:8000/api";
 
   const [parts, setParts] = useState([]);
   const [editingPart, setEditingPart] = useState(null);
   const [showForm, setShowForm] = useState(false); // 👈 NEW STATE
-
+const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     id: "",
     Facility: "",
@@ -36,23 +37,45 @@ const InventoryParts = () => {
 
   const generateID = () => "PART-" + Date.now();
 
-  const fetchParts = async () => {
-    try {
-      const res = await axios.get(`${BASE_URL}/Get_AllPartInventory`);
-      setParts(res.data.data || []);
-    } catch (error) {
-      console.error("Fetch error:", error);
-    }
-  };
+  // const fetch_Inventory_Parts = async () => {
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/Get_AllPartInventory`);
+  //     setParts(res.data.data || []);
+  //   } catch (error) {
+  //     console.error("Fetch error:", error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchParts();
-  }, []);
+  // useEffect(() => {
+  //   fetch_Inventory_Parts();
+  // }, []);
+
+  const fetch_Inventory_Parts = async () => {
+      setLoading(true);
+      try {
+        // Supabase: SELECT * FROM your_table_name
+        // Replace 'your_table_name' with your actual Supabase table name.
+        const { data, error } = await supabase.from("Inventtory_Parts").select("*");
+        if (error) {
+          throw new Error(error.message);
+        }
+        setParts(data);
+        setError(null);
+      } catch (err) {
+        setError("Failed to fetch orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    useEffect(() => {
+      fetch_Inventory_Parts();
+    }, []);
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/Delete_PartInventory/${id}`);
-      fetchParts();
+      fetch_Inventory_Parts();
     } catch (error) {
       console.error("Delete error:", error);
     }
@@ -98,7 +121,7 @@ const InventoryParts = () => {
       } else {
         await axios.post(`${BASE_URL}/Create_PartInventory`, formData);
       }
-      fetchParts();
+      fetch_Inventory_Parts();
       handleCancel();
     } catch (error) {
       console.error("Submit error:", error);

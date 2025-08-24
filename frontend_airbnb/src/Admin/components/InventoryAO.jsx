@@ -21,6 +21,7 @@ import {
   FormControl,
 } from "@mui/material";
 
+import { supabase } from "../../supabase/SupabaseClient"; // <-- Import your Supabase client
 const BASE_URL = "http://10.2.0.2:8000/api";
 
 const InventoryAO = () => {
@@ -57,30 +58,51 @@ const InventoryAO = () => {
   });
 
   useEffect(() => {
-    fetchInventory();
-  }, []);
-
-  useEffect(() => {
     applyFilters();
   }, [filters, inventoryList]);
 
-  const fetchInventory = async () => {
+  // const fetchInventory = async () => {
+  //   setLoading(true);
+  //   setError("");
+  //   try {
+  //     const res = await fetch(`${BASE_URL}/Get_Inventory`);
+  //     const data = await res.json();
+  //     if (res.ok && data.success) {
+  //       setInventoryList(data.data);
+  //     } else {
+  //       setError(data.message || "Failed to fetch inventory");
+  //     }
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchInventory();
+  // }, []);
+
+  const fetch_Inventory_AO = async () => {
     setLoading(true);
-    setError("");
     try {
-      const res = await fetch(`${BASE_URL}/Get_Inventory`);
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setInventoryList(data.data);
-      } else {
-        setError(data.message || "Failed to fetch inventory");
+      // Supabase: SELECT * FROM your_table_name
+      // Replace 'your_table_name' with your actual Supabase table name.
+      const { data, error } = await supabase.from("Inventory_AO").select("*");
+      if (error) {
+        throw new Error(error.message);
       }
+      setInventoryList(data);
+      setError(null);
     } catch (err) {
-      setError(err.message);
+      setError("Failed to fetch orders");
     } finally {
       setLoading(false);
     }
   };
+  useEffect(() => {
+    fetch_Inventory_AO();
+  }, []);
 
   const applyFilters = () => {
     const filtered = inventoryList.filter((item) =>
@@ -115,7 +137,7 @@ const InventoryAO = () => {
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccessMsg("Inventory created successfully!");
-        fetchInventory();
+        fetch_Inventory_AO();
         setForm(initialFormState);
       } else {
         setError(data.message || "Failed to create inventory");
@@ -159,7 +181,7 @@ const InventoryAO = () => {
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccessMsg("Inventory updated successfully!");
-        fetchInventory();
+        fetch_Inventory_AO();
         cancelEdit();
       } else {
         setError(data.message || "Failed to update inventory");
@@ -172,7 +194,8 @@ const InventoryAO = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this inventory item?")) return;
+    if (!window.confirm("Are you sure you want to delete this inventory item?"))
+      return;
     setLoading(true);
     setError("");
     setSuccessMsg("");
@@ -183,7 +206,7 @@ const InventoryAO = () => {
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccessMsg("Inventory deleted successfully!");
-        fetchInventory();
+        fetch_Inventory_AO();
       } else {
         setError(data.message || "Failed to delete inventory");
       }
@@ -213,7 +236,7 @@ const InventoryAO = () => {
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccessMsg("CSV uploaded successfully!");
-        fetchInventory();
+        fetch_Inventory_AO();
       } else {
         setError(data.message || "Failed to upload CSV");
       }
@@ -231,8 +254,16 @@ const InventoryAO = () => {
         {editingId ? "Update Inventory" : "Create Inventory"}
       </Typography>
 
-      {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
-      {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+      {successMsg && (
+        <Alert severity="success" sx={{ mb: 2 }}>
+          {successMsg}
+        </Alert>
+      )}
 
       <Box mb={2}>
         <input
@@ -278,10 +309,21 @@ const InventoryAO = () => {
           disabled={loading}
           sx={{ mr: 2 }}
         >
-          {loading ? <CircularProgress size={24} color="inherit" /> : editingId ? "Update" : "Create"}
+          {loading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : editingId ? (
+            "Update"
+          ) : (
+            "Create"
+          )}
         </Button>
         {editingId && (
-          <Button variant="outlined" color="secondary" onClick={cancelEdit} disabled={loading}>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={cancelEdit}
+            disabled={loading}
+          >
             Cancel
           </Button>
         )}
@@ -293,7 +335,19 @@ const InventoryAO = () => {
 
       {/* Filter UI */}
       <Grid container spacing={2} mb={2}>
-        {["Facility", "Location_", "Brand", "Model","Screen_Size","Processor",'RAM',"Hard_Drive","Stand","QTY_Recieved","QTY_On_Hand"].map((filterKey) => (
+        {[
+          "Facility",
+          "Location_",
+          "Brand",
+          "Model",
+          "Screen_Size",
+          "Processor",
+          "RAM",
+          "Hard_Drive",
+          "Stand",
+          "QTY_Recieved",
+          "QTY_On_Hand",
+        ].map((filterKey) => (
           <Grid item xs={12} sm={6} md={3} key={filterKey}>
             <TextField
               fullWidth

@@ -17,6 +17,7 @@ import {
 } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 
+import { supabase } from "../../supabase/SupabaseClient"; // <-- Import your Supabase client
 const BASE_URL = "http://192.168.0.50:8000/api";
 
 const initialFormState = {
@@ -41,28 +42,50 @@ const InventoryDesktops = () => {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
-  useEffect(() => {
-    fetchInventory();
-  }, []);
+  // useEffect(() => {
+  //   fetch_Inventory_Desktops();
+  // }, []);
 
-  const fetchInventory = async () => {
-    setLoading(true);
-    setError(null);
-    setMessage(null);
-    try {
-      const res = await axios.get(`${BASE_URL}/Get_AllDesktopInventory`);
-      if (res.data.success) {
-        setInventoryList(res.data.data || []);
-      } else {
-        setInventoryList([]);
-        setMessage(res.data.message || "No desktop inventory records found.");
-      }
-    } catch (err) {
-      setError("Failed to fetch inventory.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetch_Inventory_Desktops = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   setMessage(null);
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/Get_AllDesktopInventory`);
+  //     if (res.data.success) {
+  //       setInventoryList(res.data.data || []);
+  //     } else {
+  //       setInventoryList([]);
+  //       setMessage(res.data.message || "No desktop inventory records found.");
+  //     }
+  //   } catch (err) {
+  //     setError("Failed to fetch inventory.");
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+  const fetch_Inventory_Desktops = async () => {
+        setLoading(true);
+        try {
+          // Supabase: SELECT * FROM your_table_name
+          // Replace 'your_table_name' with your actual Supabase table name.
+          const { data, error } = await supabase.from("Inventory_Desktops").select("*");
+          if (error) {
+            throw new Error(error.message);
+          }
+          setInventoryList(data);
+          setError(null);
+        } catch (err) {
+          setError("Failed to fetch orders");
+        } finally {
+          setLoading(false);
+        }
+      };
+    useEffect(() => {
+      fetch_Inventory_Desktops();
+    }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -100,7 +123,7 @@ const InventoryDesktops = () => {
         setMessage("Desktop inventory item updated successfully!");
       }
 
-      fetchInventory();
+      fetch_Inventory_Desktops();
       setForm(initialFormState);
       setEditingId(null);
     } catch (err) {
@@ -138,7 +161,7 @@ const InventoryDesktops = () => {
       if (!res.data.success)
         throw new Error(res.data.message || "Delete failed");
       setMessage("Desktop inventory item deleted successfully!");
-      fetchInventory();
+      fetch_Inventory_Desktops();
     } catch (err) {
       setError(err.message || "Error deleting item.");
     }

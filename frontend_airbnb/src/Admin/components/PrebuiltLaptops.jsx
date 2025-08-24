@@ -17,7 +17,7 @@ import {
   TextField,
   Grid,
 } from "@mui/material";
-
+import { supabase } from "../../supabase/SupabaseClient";
 // Use correct BASE_URL for your environment
 const BASE_URL = "http://10.2.0.2:8000/api";
 
@@ -44,23 +44,47 @@ const PrebuiltLaptops = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [editingLaptop, setEditingLaptop] = useState(null);
   const [formData, setFormData] = useState(emptyLaptop);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const fetchLaptops = async () => {
+  // const fetch_Inventory_Laptops = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/GetAllPrebuiltLaptops`);
+  //     if (res.data.success) {
+  //       setLaptops(res.data.data);
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching laptops:", error);
+  //   }
+  //   setLoading(false);
+  // };
+
+  // useEffect(() => {
+  //   fetch_Inventory_Laptops();
+  // }, []);
+  const fetch_Inventory_Laptops = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/GetAllPrebuiltLaptops`);
-      if (res.data.success) {
-        setLaptops(res.data.data);
+      // Supabase: SELECT * FROM your_table_name
+      // Replace 'your_table_name' with your actual Supabase table name.
+      const { data, error } = await supabase
+        .from("Prebuilt_Laptops")
+        .select("*");
+      if (error) {
+        throw new Error(error.message);
       }
-    } catch (error) {
-      console.error("Error fetching laptops:", error);
+      setLaptops(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch orders");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchLaptops();
+    fetch_Inventory_Laptops();
   }, []);
 
   const handleOpenDialog = (laptop = null) => {
@@ -101,7 +125,7 @@ const PrebuiltLaptops = () => {
         await axios.post(`${BASE_URL}/CreatePrebuiltLaptop`, payload);
       }
 
-      fetchLaptops();
+      fetch_Inventory_Laptops();
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving laptop:", error);
@@ -114,7 +138,7 @@ const PrebuiltLaptops = () => {
 
     try {
       await axios.delete(`${BASE_URL}/DeletePrebuiltLaptop/${id}`);
-      fetchLaptops();
+      fetch_Inventory_Laptops();
     } catch (error) {
       console.error("Error deleting laptop:", error);
       alert("Failed to delete laptop.");

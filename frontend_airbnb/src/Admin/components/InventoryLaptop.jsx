@@ -14,12 +14,13 @@ import {
   Grid,
   Collapse,
 } from "@mui/material";
-
+import { supabase } from "../../supabase/SupabaseClient";
 const InventoryLaptop = () => {
   const [laptops, setLaptops] = useState([]);
   const [editingLaptop, setEditingLaptop] = useState(null);
   const [showForm, setShowForm] = useState(false);
-
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [formData, setFormData] = useState({
     // Inventory_Laptops_ID: "",
     Facility: "",
@@ -56,23 +57,45 @@ const InventoryLaptop = () => {
 
   const generateID = () => "LAP-" + Date.now();
 
-  const fetchLaptops = async () => {
+  // const fetchLaptops = async () => {
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/Get_AllLaptopInventory`);
+  //     setLaptops(res.data.data || []);
+  //   } catch (error) {
+  //     console.error("Fetch error:", error);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   fetchLaptops();
+  // }, []);
+
+  const fetch_Inventory_Laptops = async () => {
+    setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/Get_AllLaptopInventory`);
-      setLaptops(res.data.data || []);
-    } catch (error) {
-      console.error("Fetch error:", error);
+      // Supabase: SELECT * FROM your_table_name
+      // Replace 'your_table_name' with your actual Supabase table name.
+      const { data, error } = await supabase.from("Inventory_Laptops").select("*");
+      if (error) {
+        throw new Error(error.message);
+      }
+      setLaptops(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch orders");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLaptops();
+    fetch_Inventory_Laptops();
   }, []);
 
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${BASE_URL}/Delete_LaptopInventory/${id}`);
-      fetchLaptops();
+      fetch_Inventory_Laptops();
     } catch (error) {
       console.error("Delete error:", error);
     }
@@ -123,7 +146,7 @@ const InventoryLaptop = () => {
       } else {
         await axios.post(`${BASE_URL}/Create_LaptopInventory`, formData);
       }
-      fetchLaptops();
+      fetch_Inventory_Laptops();
       handleCancel();
     } catch (error) {
       console.error("Submit error:", error);
@@ -230,60 +253,59 @@ const InventoryLaptop = () => {
       <TableContainer component={Paper}>
         <Table stickyHeader>
           <TableHead>
-  <TableRow>
-    <TableCell>Facility</TableCell>
-    <TableCell>Location</TableCell>
-    <TableCell>Brand</TableCell>
-    <TableCell>Model</TableCell>
-    <TableCell>Type</TableCell>
-    <TableCell>Processor</TableCell>
-    <TableCell>RAM</TableCell>
-    <TableCell>Hard Drive</TableCell>
-    <TableCell>Screen Size</TableCell>
-    <TableCell>Resolution</TableCell>
-    <TableCell>QTY Received</TableCell>
-    <TableCell>QTY on Hand</TableCell>
-    <TableCell>Actions</TableCell>
-  </TableRow>
-</TableHead>
+            <TableRow>
+              <TableCell>Facility</TableCell>
+              <TableCell>Location</TableCell>
+              <TableCell>Brand</TableCell>
+              <TableCell>Model</TableCell>
+              <TableCell>Type</TableCell>
+              <TableCell>Processor</TableCell>
+              <TableCell>RAM</TableCell>
+              <TableCell>Hard Drive</TableCell>
+              <TableCell>Screen Size</TableCell>
+              <TableCell>Resolution</TableCell>
+              <TableCell>QTY Received</TableCell>
+              <TableCell>QTY on Hand</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
 
-<TableBody>
-  {filteredLaptops.map((laptop) => (
-    <TableRow key={laptop.Inventory_Laptops_ID}>
-      <TableCell>{laptop.Facility}</TableCell>
-      <TableCell>{laptop.Location_}</TableCell>
-      <TableCell>{laptop.Brand}</TableCell>
-      <TableCell>{laptop.Model}</TableCell>
-      <TableCell>{laptop.Type_}</TableCell>
-      <TableCell>{laptop.Processor}</TableCell>
-      <TableCell>{laptop.RAM}</TableCell>
-      <TableCell>{laptop.Hard_Drive}</TableCell>
-      <TableCell>{laptop.Screen_Size}</TableCell>
-      <TableCell>{laptop.Resolution}</TableCell>
-      <TableCell>{laptop.QTY_Recieved}</TableCell>
-      <TableCell>{laptop.QTY_On_Hand}</TableCell>
-      <TableCell>
-        <Button
-          variant="outlined"
-          size="small"
-          onClick={() => handleEdit(laptop)}
-          sx={{ mr: 1 }}
-        >
-          Edit
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          color="error"
-          onClick={() => handleDelete(laptop.Inventory_Laptops_ID)}
-        >
-          Delete
-        </Button>
-      </TableCell>
-    </TableRow>
-  ))}
-</TableBody>
-
+          <TableBody>
+            {filteredLaptops.map((laptop) => (
+              <TableRow key={laptop.Inventory_Laptops_ID}>
+                <TableCell>{laptop.Facility}</TableCell>
+                <TableCell>{laptop.Location_}</TableCell>
+                <TableCell>{laptop.Brand}</TableCell>
+                <TableCell>{laptop.Model}</TableCell>
+                <TableCell>{laptop.Type_}</TableCell>
+                <TableCell>{laptop.Processor}</TableCell>
+                <TableCell>{laptop.RAM}</TableCell>
+                <TableCell>{laptop.Hard_Drive}</TableCell>
+                <TableCell>{laptop.Screen_Size}</TableCell>
+                <TableCell>{laptop.Resolution}</TableCell>
+                <TableCell>{laptop.QTY_Recieved}</TableCell>
+                <TableCell>{laptop.QTY_On_Hand}</TableCell>
+                <TableCell>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => handleEdit(laptop)}
+                    sx={{ mr: 1 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={() => handleDelete(laptop.Inventory_Laptops_ID)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
         </Table>
       </TableContainer>
     </Paper>

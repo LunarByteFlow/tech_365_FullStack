@@ -18,6 +18,7 @@ import {
   Grid,
 } from "@mui/material";
 
+import { supabase } from "../../supabase/SupabaseClient";
 // Replace with your real backend URL
 const BASE_URL = "http://10.2.0.2:8000/api";
 
@@ -38,25 +39,48 @@ const emptyDesktop = {
 
 const PrebuiltDesktops = () => {
   const [desktops, setDesktops] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [editingDesktop, setEditingDesktop] = useState(null);
   const [formData, setFormData] = useState(emptyDesktop);
 
-  const fetchDesktops = async () => {
+  // const fetch_Inventory_Desktops = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const res = await axios.get(`${BASE_URL}/GetAllPrebuiltDesktops`);
+  //     setDesktops(res.data.success ? res.data.data : []);
+  //   } catch (error) {
+  //     console.error("Error fetching desktops:", error);
+  //     setDesktops([]);
+  //   }
+  //   setLoading(false);
+  // };
+
+  // useEffect(() => {
+  //   fetch_Inventory_Desktops();
+  // }, []);
+
+  const fetch_Inventory_Desktops = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/GetAllPrebuiltDesktops`);
-      setDesktops(res.data.success ? res.data.data : []);
-    } catch (error) {
-      console.error("Error fetching desktops:", error);
-      setDesktops([]);
+      // Supabase: SELECT * FROM your_table_name
+      // Replace 'your_table_name' with your actual Supabase table name.
+      const { data, error } = await supabase.from("Prebuilt_Desktops").select("*");
+      if (error) {
+        throw new Error(error.message);
+      }
+      setDesktops(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch orders");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
-    fetchDesktops();
+    fetch_Inventory_Desktops();
   }, []);
 
   const handleOpenDialog = (desktop = null) => {
@@ -98,7 +122,7 @@ const PrebuiltDesktops = () => {
         await axios.post(`${BASE_URL}/CreatePrebuiltDesktop`, payload);
       }
 
-      fetchDesktops();
+      fetch_Inventory_Desktops();
       handleCloseDialog();
     } catch (error) {
       console.error("Error saving desktop:", error);
@@ -112,7 +136,7 @@ const PrebuiltDesktops = () => {
 
     try {
       await axios.delete(`${BASE_URL}/DeletePrebuiltDesktop/${id}`);
-      fetchDesktops();
+      fetch_Inventory_Desktops();
     } catch (error) {
       console.error("Error deleting desktop:", error);
       alert("Failed to delete desktop.");
