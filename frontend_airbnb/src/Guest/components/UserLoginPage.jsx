@@ -358,7 +358,6 @@
 
 // export default UserLoginPage;
 
-
 import React, { useState, useContext } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { logincontext } from "../../GlobalContext/context";
@@ -501,7 +500,16 @@ const UserLoginPage = () => {
         showConfirmButton: false,
       });
 
-      navigate(data.role.toLowerCase() === "admin" ? "/admin" : "/user");
+      const roleRoutes = {
+        admin: "/admin",
+        technician: "/technician",
+        inventory: "/inventory",
+        product_finish: "/product_finish",
+        user: "/user",
+      };
+
+      const role = data.role.toLowerCase();
+      navigate(roleRoutes[role] || "/guest");
     } catch (err) {
       console.error("Login error:", err.message);
       Swal.fire({
