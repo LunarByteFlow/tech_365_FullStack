@@ -55,7 +55,7 @@ const [loading, setLoading] = useState(true);
       try {
         // Supabase: SELECT * FROM your_table_name
         // Replace 'your_table_name' with your actual Supabase table name.
-        const { data, error } = await supabase.from("Inventtory_Parts").select("*");
+        const { data, error } = await supabase.from("Inventory_Parts").select("*");
         if (error) {
           throw new Error(error.message);
         }
