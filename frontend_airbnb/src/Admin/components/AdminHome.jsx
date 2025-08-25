@@ -108,7 +108,7 @@ const AdminHome = () => {
                 </Typography>
               </Box>
               <Divider sx={{ mb: 2 }} />
-              <LowStockTable />
+              {/* <LowStockTable /> */}
             </Paper>
           </Grid>
           {/* Display Orders */}
