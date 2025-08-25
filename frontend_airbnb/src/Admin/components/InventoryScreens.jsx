@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import Swal from "sweetalert2";
 import {
   Paper,
   Typography,
@@ -17,10 +17,8 @@ import {
 } from "@mui/material";
 import { v4 as uuidv4 } from "uuid";
 import { supabase } from "../../supabase/SupabaseClient";
-const BASE_URL = "http://10.2.0.2:8000/api";
 
 const initialFormState = {
-  // Inventory_Screens_ID: "",
   Facility: "",
   Location_: "",
   Brand: "",
@@ -32,58 +30,46 @@ const initialFormState = {
   QTY_On_Hand: "",
 };
 
+const numericFields = ["QTY_Recieved", "QTY_On_Hand"];
+
+const sanitizeFormData = (data) => {
+  const sanitized = { ...data };
+  numericFields.forEach((field) => {
+    sanitized[field] =
+      sanitized[field] === "" || sanitized[field] === null
+        ? null
+        : Number(sanitized[field]);
+  });
+  return sanitized;
+};
+
 const InventoryScreens = () => {
   const [screens, setScreens] = useState([]);
   const [form, setForm] = useState(initialFormState);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
 
-  // useEffect(() => {
-  //   fetch_Inventory_Screens();
-  // }, []);
+  // Fetch all screens
+  const fetchScreens = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from("Inventory_Screens")
+        .select("*");
+      if (error) throw error;
+      setScreens(data);
+      setError(null);
+    } catch (err) {
+      setError(err.message || "Failed to fetch screens");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // const fetch_Inventory_Screens = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   setMessage(null);
-  //   try {
-  //     const res = await axios.get(`${BASE_URL}/Get_AllInventoryScreens`);
-  //     if (res.data.success) {
-  //       setScreens(res.data.data || []);
-  //     } else {
-  //       setScreens([]);
-  //       setMessage(res.data.message || "No screens found.");
-  //     }
-  //   } catch (err) {
-  //     setError("Failed to fetch screens.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const fetch_Inventory_Screens = async () => {
-      setLoading(true);
-      try {
-        // Supabase: SELECT * FROM your_table_name
-        // Replace 'your_table_name' with your actual Supabase table name.
-        const { data, error } = await supabase.from("OrderSheet").select("*");
-        if (error) {
-          throw new Error(error.message);
-        }
-        setScreens(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to fetch orders");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      fetch_Inventory_Screens();
-    }, []);
+  useEffect(() => {
+    fetchScreens();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,71 +77,59 @@ const InventoryScreens = () => {
   };
 
   const handleSubmit = async () => {
-    setError(null);
-    setMessage(null);
+    const sanitizedData = sanitizeFormData(form);
     try {
-      let payload = { ...form };
-
       if (!editingId) {
-        // Creating new screen
-        if (!payload.Inventory_Screens_ID) {
-          payload.Inventory_Screens_ID = uuidv4();
-        }
-        const res = await axios.post(
-          `${BASE_URL}/Create_InventoryScreen`,
-          payload
-        );
-        if (!res.data.success)
-          throw new Error(res.data.message || "Create failed");
-        setMessage("Screen created successfully!");
+        // Insert new screen
+        const payload = { ...sanitizedData }; // DO NOT include Inventory_Screens_ID
+        const { error } = await supabase
+          .from("Inventory_Screens")
+          .insert([payload]);
+        if (error) throw error;
+        Swal.fire("Success", "Screen created successfully!", "success");
       } else {
-        // Updating existing screen
-        const res = await axios.put(
-          `${BASE_URL}/Update_InventoryScreen/${editingId}`,
-          payload
-        );
-        if (!res.data.success)
-          throw new Error(res.data.message || "Update failed");
-        setMessage("Screen updated successfully!");
+        // Update existing screen
+        const { error } = await supabase
+          .from("Inventory_Screens")
+          .update(sanitizedData)
+          .eq("Inventory_Screens_ID", editingId);
+        if (error) throw error;
+        Swal.fire("Success", "Screen updated successfully!", "success");
       }
-
-      fetch_Inventory_Screens();
       setForm(initialFormState);
       setEditingId(null);
+      fetchScreens();
     } catch (err) {
-      setError(err.message || "Error submitting data.");
+      Swal.fire("Error", err.message || "Failed to submit screen", "error");
     }
   };
 
   const handleEdit = (item) => {
     setEditingId(item.Inventory_Screens_ID);
     setForm({ ...item });
-    setError(null);
-    setMessage(null);
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setForm(initialFormState);
-    setError(null);
-    setMessage(null);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this screen?")) return;
+    const confirm = window.confirm(
+      "Are you sure you want to delete this screen?"
+    );
+    if (!confirm) return;
 
-    setError(null);
-    setMessage(null);
     try {
-      const res = await axios.delete(
-        `${BASE_URL}/Delete_InventoryScreen/${id}`
-      );
-      if (!res.data.success)
-        throw new Error(res.data.message || "Delete failed");
-      setMessage("Screen deleted successfully!");
-      fetch_Inventory_Screens();
+      const { error } = await supabase
+        .from("Inventory_Screens")
+        .delete()
+        .eq("Inventory_Screens_ID", id);
+      if (error) throw error;
+      Swal.fire("Deleted!", "Screen deleted successfully!", "success");
+      fetchScreens();
     } catch (err) {
-      setError(err.message || "Error deleting screen.");
+      Swal.fire("Error", err.message || "Failed to delete screen", "error");
     }
   };
 
@@ -170,11 +144,6 @@ const InventoryScreens = () => {
           {error}
         </Alert>
       )}
-      {message && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {message}
-        </Alert>
-      )}
 
       <Stack
         direction="row"
@@ -184,24 +153,17 @@ const InventoryScreens = () => {
         columnGap={3}
         sx={{ mb: 4 }}
       >
-        {Object.keys(initialFormState).map((field) => {
-          const label = field
-            .replace(/_/g, " ")
-            .replace("ID", "Id")
-            .replace("Ports ", "Ports");
-          return (
-            <TextField
-              key={field}
-              label={label}
-              name={field}
-              value={form[field]}
-              onChange={handleChange}
-              disabled={field === "Inventory_Screens_ID" && editingId !== null}
-              sx={{ flex: "1 1 220px", minWidth: 200 }}
-              size="small"
-            />
-          );
-        })}
+        {Object.keys(initialFormState).map((field) => (
+          <TextField
+            key={field}
+            label={field.replace(/_/g, " ")}
+            name={field}
+            value={form[field]}
+            onChange={handleChange}
+            sx={{ flex: "1 1 220px", minWidth: 200 }}
+            size="small"
+          />
+        ))}
       </Stack>
 
       <Stack direction="row" spacing={2} justifyContent="flex-end" mb={4}>

@@ -1,152 +1,113 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import { supabase } from "../../supabase/SupabaseClient";
+import Swal from "sweetalert2";
 
-// const BASE_URL = "http://localhost:8000/api"; // Change to your backend URL
-import { supabase } from "../../supabase/SupabaseClient"; // <-- Import your Supabase client
-const BASE_URL= "http://10.2.0.2:8000/api";
+const initialFormState = {
+  ReturnCode: "",
+  RMA: "",
+  OrderNumber: "",
+  RetunTrackingNumber: "",
+  Model: "",
+  Return_Type: "",
+  Cable_And_Charger: "",
+  Comments: "",
+  Action_Required: "",
+  Process: "",
+};
 
-function ReturnsApp() {
+const ReturnsApp = () => {
   const [returns, setReturns] = useState([]);
-  const [selectedReturn, setSelectedReturn] = useState(null);
-  const [formData, setFormData] = useState({
-    ReturnCode: "",
-    RMA: "",
-    OrderNumber: "",
-    RetunTrackingNumber: "",
-    Model: "",
-    Return_Type: "",
-    Cable_And_Charger: "",
-    Comments: "",
-    Action_Required: "",
-    Process: "",
-  });
-  const [isEditing, setIsEditing] = useState(false);
+  const [formData, setFormData] = useState(initialFormState);
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch all returns
-  // const fetchReturns = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await axios.get(BASE_URL);
-  //     setReturns(res.data.data);
-  //     setError("");
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Failed to fetch returns");
-  //   }
-  //   setLoading(false);
-  // };
-
-
-  const fetch_Order_Returns = async () => {
-      setLoading(true);
-      try {
-        // Supabase: SELECT * FROM your_table_name
-        // Replace 'your_table_name' with your actual Supabase table name.
-        const { data, error } = await supabase.from("Order_Returns").select("*");
-        if (error) {
-          throw new Error(error.message);
-        }
-        setReturns(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to fetch orders");
-      } finally {
-        setLoading(false);
-      }
-    };
-  useEffect(() => {
-    fetch_Order_Returns();
-  }, []);
-
-  // Handle input changes for form
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((fd) => ({ ...fd, [name]: value }));
-  };
-
-  // Select a return record to view or edit
-  const handleSelect = async (id) => {
+  // Fetch all return records
+  const fetchReturns = async () => {
     setLoading(true);
     try {
-      const res = await axios.get(`${BASE_URL}/${id}`);
-      setSelectedReturn(res.data.data);
-      setFormData(res.data.data);
-      setIsEditing(true);
+      const { data, error } = await supabase.from("Order_Returns").select("*");
+      if (error) throw error;
+      setReturns(data);
       setError("");
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to fetch return details");
-      setSelectedReturn(null);
-      setIsEditing(false);
+      setError(err.message || "Failed to fetch return records");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // Create or update return record
+  useEffect(() => {
+    fetchReturns();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      if (isEditing && selectedReturn) {
-        // Update
-        await axios.put(`${BASE_URL}/${selectedReturn.Order_Returns_ID}`, formData);
-        alert("Return record updated successfully.");
+      if (editingId) {
+        // UPDATE
+        const { error } = await supabase
+          .from("Order_Returns")
+          .update(formData)
+          .eq("Order_Returns_ID", editingId);
+        if (error) throw error;
+        Swal.fire("Success", "Return record updated successfully!", "success");
       } else {
-        // Create
-        await axios.post(BASE_URL, formData);
-        alert("Return record created successfully.");
+        // CREATE
+        const { error } = await supabase.from("Order_Returns").insert([formData]);
+        if (error) throw error;
+        Swal.fire("Success", "Return record created successfully!", "success");
       }
-      setFormData({
-        ReturnCode: "",
-        RMA: "",
-        OrderNumber: "",
-        RetunTrackingNumber: "",
-        Model: "",
-        Return_Type: "",
-        Cable_And_Charger: "",
-        Comments: "",
-        Action_Required: "",
-        Process: "",
-      });
-      setSelectedReturn(null);
-      setIsEditing(false);
-      fetch_Order_Returns();
-      setError("");
+
+      setFormData(initialFormState);
+      setEditingId(null);
+      fetchReturns();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to save return record");
+      Swal.fire("Error", err.message || "Operation failed", "error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // Delete a return record
+  const handleEdit = (item) => {
+    setEditingId(item.Order_Returns_ID);
+    setFormData({ ...item });
+    setError("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setFormData(initialFormState);
+    setError("");
+  };
+
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this return record?")) return;
     setLoading(true);
     try {
-      await axios.delete(`${BASE_URL}/${id}`);
-      alert("Return record deleted successfully.");
-      if (selectedReturn?.Order_Returns_ID === id) {
-        setSelectedReturn(null);
-        setIsEditing(false);
-        setFormData({
-          ReturnCode: "",
-          RMA: "",
-          OrderNumber: "",
-          RetunTrackingNumber: "",
-          Model: "",
-          Return_Type: "",
-          Cable_And_Charger: "",
-          Comments: "",
-          Action_Required: "",
-          Process: "",
-        });
+      const { error } = await supabase
+        .from("Order_Returns")
+        .delete()
+        .eq("Order_Returns_ID", id);
+      if (error) throw error;
+      Swal.fire("Deleted!", "Return record deleted successfully!", "success");
+
+      if (editingId === id) {
+        handleCancelEdit();
       }
-      fetch_Order_Returns();
-      setError("");
+
+      fetchReturns();
     } catch (err) {
-      setError(err.response?.data?.message || "Failed to delete return record");
+      Swal.fire("Error", err.message || "Failed to delete record", "error");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -155,7 +116,7 @@ function ReturnsApp() {
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       <section style={{ marginBottom: 40 }}>
-        <h2>{isEditing ? "Edit Return Record" : "Create New Return Record"}</h2>
+        <h2>{editingId ? "Edit Return Record" : "Create New Return Record"}</h2>
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 10 }}>
           {[
             "ReturnCode",
@@ -178,6 +139,7 @@ function ReturnsApp() {
               style={{ padding: 8 }}
             />
           ))}
+
           <textarea
             name="Comments"
             placeholder="Comments"
@@ -188,27 +150,13 @@ function ReturnsApp() {
           />
 
           <button type="submit" disabled={loading} style={{ padding: "10px 20px" }}>
-            {loading ? "Saving..." : isEditing ? "Update" : "Create"}
+            {loading ? "Saving..." : editingId ? "Update" : "Create"}
           </button>
-          {isEditing && (
+
+          {editingId && (
             <button
               type="button"
-              onClick={() => {
-                setIsEditing(false);
-                setSelectedReturn(null);
-                setFormData({
-                  ReturnCode: "",
-                  RMA: "",
-                  OrderNumber: "",
-                  RetunTrackingNumber: "",
-                  Model: "",
-                  Return_Type: "",
-                  Cable_And_Charger: "",
-                  Comments: "",
-                  Action_Required: "",
-                  Process: "",
-                });
-              }}
+              onClick={handleCancelEdit}
               style={{ padding: "10px 20px", backgroundColor: "#ccc", marginLeft: 10 }}
             >
               Cancel
@@ -246,7 +194,7 @@ function ReturnsApp() {
                   <td>{ret.Model}</td>
                   <td>{ret.Return_Type}</td>
                   <td>
-                    <button onClick={() => handleSelect(ret.Order_Returns_ID)} disabled={loading}>
+                    <button onClick={() => handleEdit(ret)} disabled={loading}>
                       Edit
                     </button>
                     <button
@@ -265,6 +213,6 @@ function ReturnsApp() {
       </section>
     </div>
   );
-}
+};
 
 export default ReturnsApp;

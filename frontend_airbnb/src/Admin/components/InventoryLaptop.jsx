@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Paper,
   Typography,
@@ -14,90 +13,106 @@ import {
   Grid,
   Collapse,
 } from "@mui/material";
+import Swal from "sweetalert2";
 import { supabase } from "../../supabase/SupabaseClient";
+
 const InventoryLaptop = () => {
+  const initialFormState = {
+    Facility: "",
+    Location_: "",
+    Brand: "",
+    Model: "",
+    Desk_Type: "",
+    Processor: "",
+    RAM: "",
+    Hard_Drive: "",
+    Screen_Size: "",
+    Resolution: "",
+    QTY_Recieved: "",
+    QTY_On_Hand: "",
+  };
+
+  const numericFields = ["QTY_Recieved", "QTY_On_Hand"];
+  const sanitizeFormData = (data) => {
+    const sanitized = { ...data };
+    numericFields.forEach((field) => {
+      sanitized[field] =
+        sanitized[field] === "" || sanitized[field] === null
+          ? null
+          : Number(sanitized[field]);
+    });
+    return sanitized;
+  };
+
   const [laptops, setLaptops] = useState([]);
   const [editingLaptop, setEditingLaptop] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    // Inventory_Laptops_ID: "",
-    Facility: "",
-    Location_: "",
-    Brand: "",
-    Model: "",
-    Type_: "",
-    Processor: "",
-    RAM: "",
-    Hard_Drive: "",
-    Screen_Size: "",
-    Resolution: "",
-    QTY_Recieved: "",
-    QTY_On_Hand: "",
-  });
+  const [formData, setFormData] = useState(initialFormState);
+  const [filters, setFilters] = useState(initialFormState);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const [filters, setFilters] = useState({
-    // Inventory_Laptops_ID: "",
-    Facility: "",
-    Location_: "",
-    Brand: "",
-    Model: "",
-    Type_: "",
-    Processor: "",
-    RAM: "",
-    Hard_Drive: "",
-    Screen_Size: "",
-    Resolution: "",
-    QTY_Recieved: "",
-    QTY_On_Hand: "",
-  });
-
-  const BASE_URL = "http://10.2.0.2:8000/api";
-
-  const generateID = () => "LAP-" + Date.now();
-
-  // const fetchLaptops = async () => {
-  //   try {
-  //     const res = await axios.get(`${BASE_URL}/Get_AllLaptopInventory`);
-  //     setLaptops(res.data.data || []);
-  //   } catch (error) {
-  //     console.error("Fetch error:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchLaptops();
-  // }, []);
-
-  const fetch_Inventory_Laptops = async () => {
+  // Fetch all laptops
+  const fetchLaptops = async () => {
     setLoading(true);
     try {
-      // Supabase: SELECT * FROM your_table_name
-      // Replace 'your_table_name' with your actual Supabase table name.
       const { data, error } = await supabase.from("Inventory_Laptops").select("*");
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
       setLaptops(data);
-      setError(null);
+      setError("");
     } catch (err) {
-      setError("Failed to fetch orders");
+      setError(err.message || "Failed to fetch laptops");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetch_Inventory_Laptops();
+    fetchLaptops();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const filteredLaptops = laptops.filter((laptop) =>
+    Object.entries(filters).every(([key, val]) => {
+      if (!val) return true;
+      return laptop[key]?.toString().toLowerCase().includes(val.toLowerCase());
+    })
+  );
+
+  const handleSubmit = async () => {
+    const sanitizedData = sanitizeFormData(formData);
     try {
-      await axios.delete(`${BASE_URL}/Delete_LaptopInventory/${id}`);
-      fetch_Inventory_Laptops();
-    } catch (error) {
-      console.error("Delete error:", error);
+      if (editingLaptop) {
+        // UPDATE
+        const { error } = await supabase
+          .from("Inventory_Laptops")
+          .update(sanitizedData)
+          .eq("Inventory_Laptops_ID", editingLaptop.Inventory_Laptops_ID);
+        if (error) throw error;
+        Swal.fire("Success", "Laptop updated successfully!", "success");
+      } else {
+        // CREATE
+        const { error } = await supabase
+          .from("Inventory_Laptops")
+          .insert([sanitizedData]);
+        if (error) throw error;
+        Swal.fire("Success", "Laptop added successfully!", "success");
+      }
+      setFormData(initialFormState);
+      setEditingLaptop(null);
+      setShowForm(false);
+      fetchLaptops();
+    } catch (err) {
+      Swal.fire("Error", err.message || "Operation failed", "error");
     }
   };
 
@@ -109,71 +124,26 @@ const InventoryLaptop = () => {
 
   const handleCancel = () => {
     setEditingLaptop(null);
-    resetForm();
+    setFormData(initialFormState);
     setShowForm(false);
   };
 
-  const resetForm = () => {
-    setFormData({
-      Inventory_Laptops_ID: generateID(),
-      Facility: "",
-      Location_: "",
-      Brand: "",
-      Model: "",
-      Type_: "",
-      Processor: "",
-      RAM: "",
-      Hard_Drive: "",
-      Screen_Size: "",
-      Resolution: "",
-      QTY_Recieved: "",
-      QTY_On_Hand: "",
-    });
-  };
+  const handleDelete = async (id) => {
+    const confirm = window.confirm("Are you sure you want to delete this laptop?");
+    if (!confirm) return;
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async () => {
     try {
-      if (editingLaptop) {
-        await axios.put(
-          `${BASE_URL}/Update_LaptopInventory/${editingLaptop.Inventory_Laptops_ID}`,
-          formData
-        );
-      } else {
-        await axios.post(`${BASE_URL}/Create_LaptopInventory`, formData);
-      }
-      fetch_Inventory_Laptops();
-      handleCancel();
-    } catch (error) {
-      console.error("Submit error:", error);
+      const { error } = await supabase
+        .from("Inventory_Laptops")
+        .delete()
+        .eq("Inventory_Laptops_ID", id);
+      if (error) throw error;
+      Swal.fire("Deleted!", "Laptop deleted successfully!", "success");
+      fetchLaptops();
+    } catch (err) {
+      Swal.fire("Error", err.message || "Failed to delete laptop", "error");
     }
   };
-
-  // Handle filters change
-  const handleFilterChange = (e) => {
-    const { name, value } = e.target;
-    setFilters((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // Filtering laptops according to filters state (case insensitive, partial matches)
-  const filteredLaptops = laptops.filter((laptop) => {
-    return Object.entries(filters).every(([key, filterValue]) => {
-      if (!filterValue) return true; // no filter applied on this column
-      const laptopValue = laptop[key];
-      if (laptopValue === null || laptopValue === undefined) return false;
-      return laptopValue
-        .toString()
-        .toLowerCase()
-        .includes(filterValue.toLowerCase());
-    });
-  });
 
   return (
     <Paper sx={{ padding: 3 }}>
@@ -184,7 +154,7 @@ const InventoryLaptop = () => {
       <Button
         variant="contained"
         onClick={() => {
-          resetForm();
+          setFormData(initialFormState);
           setShowForm(true);
         }}
         sx={{ mb: 2 }}
@@ -199,14 +169,15 @@ const InventoryLaptop = () => {
             {editingLaptop ? "Edit Laptop" : "Add New Laptop"}
           </Typography>
           <Grid container spacing={2}>
-            {Object.entries(formData).map(([key, value]) => (
+            {Object.keys(formData).map((key) => (
               <Grid item xs={12} sm={6} key={key}>
                 <TextField
                   label={key.replace(/_/g, " ")}
                   name={key}
                   fullWidth
-                  value={value}
+                  value={formData[key]}
                   onChange={handleChange}
+                  type={numericFields.includes(key) ? "number" : "text"}
                   disabled={key === "Inventory_Laptops_ID" && editingLaptop}
                 />
               </Grid>
@@ -225,28 +196,28 @@ const InventoryLaptop = () => {
         </Paper>
       </Collapse>
 
-      {/* Filters Section */}
+      {/* Filters */}
       <Typography variant="h6" sx={{ mt: 3, mb: 1 }}>
         Filter Inventory
       </Typography>
       <Paper sx={{ padding: 2, mb: 2 }}>
         <Grid container spacing={2}>
-          {Object.entries(filters).map(([key, value]) => (
+          {Object.keys(filters).map((key) => (
             <Grid item xs={12} sm={3} md={2} key={key}>
               <TextField
                 label={key.replace(/_/g, " ")}
                 name={key}
                 fullWidth
-                value={value}
-                onChange={handleFilterChange}
                 size="small"
+                value={filters[key]}
+                onChange={handleFilterChange}
               />
             </Grid>
           ))}
         </Grid>
       </Paper>
 
-      {/* Table Section */}
+      {/* Table */}
       <Typography variant="h6" sx={{ mt: 3 }}>
         Inventory List
       </Typography>
@@ -254,37 +225,18 @@ const InventoryLaptop = () => {
         <Table stickyHeader>
           <TableHead>
             <TableRow>
-              <TableCell>Facility</TableCell>
-              <TableCell>Location</TableCell>
-              <TableCell>Brand</TableCell>
-              <TableCell>Model</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell>Processor</TableCell>
-              <TableCell>RAM</TableCell>
-              <TableCell>Hard Drive</TableCell>
-              <TableCell>Screen Size</TableCell>
-              <TableCell>Resolution</TableCell>
-              <TableCell>QTY Received</TableCell>
-              <TableCell>QTY on Hand</TableCell>
+              {Object.keys(formData).map((key) => (
+                <TableCell key={key}>{key.replace(/_/g, " ")}</TableCell>
+              ))}
               <TableCell>Actions</TableCell>
             </TableRow>
           </TableHead>
-
           <TableBody>
             {filteredLaptops.map((laptop) => (
               <TableRow key={laptop.Inventory_Laptops_ID}>
-                <TableCell>{laptop.Facility}</TableCell>
-                <TableCell>{laptop.Location_}</TableCell>
-                <TableCell>{laptop.Brand}</TableCell>
-                <TableCell>{laptop.Model}</TableCell>
-                <TableCell>{laptop.Type_}</TableCell>
-                <TableCell>{laptop.Processor}</TableCell>
-                <TableCell>{laptop.RAM}</TableCell>
-                <TableCell>{laptop.Hard_Drive}</TableCell>
-                <TableCell>{laptop.Screen_Size}</TableCell>
-                <TableCell>{laptop.Resolution}</TableCell>
-                <TableCell>{laptop.QTY_Recieved}</TableCell>
-                <TableCell>{laptop.QTY_On_Hand}</TableCell>
+                {Object.keys(formData).map((key) => (
+                  <TableCell key={key}>{laptop[key]}</TableCell>
+                ))}
                 <TableCell>
                   <Button
                     variant="outlined"

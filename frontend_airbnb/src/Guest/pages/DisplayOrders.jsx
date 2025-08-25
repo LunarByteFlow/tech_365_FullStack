@@ -300,38 +300,25 @@
 // };
 
 // export default DisplayOrders;
-
 import React, { useEffect, useState } from "react";
-// Remove axios since we will be using the Supabase client
-// import axios from "axios";
 import Swal from "sweetalert2";
 import {
-  Box,
-  CircularProgress,
   Paper,
   Typography,
-  Alert,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Grid,
   Button,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   TextField,
-  IconButton,
+  Grid,
+  Collapse,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
-import { supabase } from "../../supabase/SupabaseClient"; // <-- Import your Supabase client
-
-// Remove BASE_URL since Supabase handles the API endpoints
-// const BASE_URL = "http://192.168.0.50:8000/api";
-
-const displayValue = (value) => (value === null || value === undefined || value === "" ? "Not Available" : value);
+import { supabase } from "../../supabase/SupabaseClient";
 
 const initialFormState = {
   PackedBy: "",
@@ -355,29 +342,37 @@ const initialFormState = {
   PostCode: "",
   DispatchDate: "",
   Prebuilt_Or_Inventory: "",
-  OrderSheet_ID:""
+};
+
+const numericFields = ["QTY"];
+
+const sanitizeFormData = (data) => {
+  const sanitized = { ...data };
+  numericFields.forEach((field) => {
+    sanitized[field] =
+      sanitized[field] === "" || sanitized[field] === null
+        ? null
+        : Number(sanitized[field]);
+  });
+  return sanitized;
 };
 
 const DisplayOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [editingOrder, setEditingOrder] = useState(null);
+  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
   const [formData, setFormData] = useState(initialFormState);
 
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // Supabase: SELECT * FROM your_table_name
-      // Replace 'your_table_name' with your actual Supabase table name.
       const { data, error } = await supabase.from("OrderSheet").select("*");
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw error;
       setOrders(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch orders");
     } finally {
       setLoading(false);
@@ -393,221 +388,181 @@ const DisplayOrders = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleAddOrder = async () => {
+  const handleCancel = () => {
+    setEditingOrder(null);
+    setFormData(initialFormState);
+    setShowForm(false);
+  };
+
+  const handleSubmit = async () => {
     try {
-      // Supabase: INSERT INTO your_table_name (...) VALUES (...)
-      const { data, error } = await supabase.from("OrderSheet").insert([formData]);
-      if (error) {
-        throw new Error(error.message);
+      const sanitizedData = sanitizeFormData(formData);
+
+      if (editingOrder) {
+        // UPDATE
+        const { error } = await supabase
+          .from("OrderSheet")
+          .update(sanitizedData)
+          .eq("OrderSheet_ID", editingOrder.OrderSheet_ID);
+        if (error) throw error;
+        Swal.fire("Success", "Order updated successfully!", "success");
+      } else {
+        // ADD
+        const { error } = await supabase.from("OrderSheet").insert([sanitizedData]);
+        if (error) throw error;
+        Swal.fire("Success", "Order added successfully!", "success");
       }
-      Swal.fire("Success", "Order added successfully!", "success");
-      setIsAddOpen(false);
-      setFormData(initialFormState);
+
+      handleCancel();
       fetchOrders();
     } catch (err) {
-      Swal.fire("Error", err.message || "Failed to add order", "error");
+      Swal.fire("Error", err.message || "Operation failed", "error");
     }
   };
 
-  const handleOpenEdit = (order) => {
+  const handleEdit = (order) => {
+    setEditingOrder(order);
     setFormData({ ...order, QTY: order.QTY?.toString() || "" });
-    setIsEditOpen(true);
+    setShowForm(true);
   };
 
-  const handleUpdateOrder = async () => {
-    if (!formData.OrderNo) {
-      Swal.fire("Validation error", "OrderNo is required for update", "warning");
-      return;
-    }
-    try {
-      // Supabase: UPDATE your_table_name SET ... WHERE OrderNo = ...
-      // Assuming 'OrderNo' is a unique identifier you can use for updates
-      const { data, error } = await supabase.from("OrderSheet").update(formData).eq("OrderSheet_ID", formData.OrderNo);
-      if (error) {
-        throw new Error(error.message);
-      }
-      Swal.fire("Success", "Order updated successfully!", "success");
-      setIsEditOpen(false);
-      setFormData(initialFormState);
-      fetchOrders();
-    } catch (err) {
-      Swal.fire("Error", err.message || "Failed to update order", "error");
-    }
-  };
-
-  const handleDelete = (id) => {
-    Swal.fire({
+  const handleDelete = async (OrderSheet_ID) => {
+    const result = await Swal.fire({
       title: "Are you sure?",
       text: "This action cannot be undone!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, delete it!",
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          // Supabase: DELETE FROM your_table_name WHERE OrderSheet_ID = ...
-          // Assuming 'OrderSheet_ID' is the primary key for deletion
-          const { data, error } = await supabase.from("OrderSheet").delete().eq("OrderSheet_ID", id);
-          if (error) {
-            throw new Error(error.message);
-          }
-          Swal.fire("Deleted!", "Order deleted successfully!", "success");
-          fetchOrders();
-        } catch (err) {
-          Swal.fire("Error", err.message || "Failed to delete order", "error");
-        }
-      }
     });
+
+    if (result.isConfirmed) {
+      try {
+        const { error } = await supabase.from("OrderSheet").delete().eq("OrderSheet_ID", OrderSheet_ID);
+        if (error) throw error;
+        Swal.fire("Deleted!", "Order deleted successfully!", "success");
+        fetchOrders();
+      } catch (err) {
+        Swal.fire("Error", err.message || "Failed to delete order", "error");
+      }
+    }
   };
 
-  // const handleCSVUpload = async (e) => {
-  //   const file = e.target.files[0];
-  //   if (!file) return;
-
-  //   Swal.fire({
-  //     title: 'Uploading...',
-  //     text: 'Please wait, this may take a moment.',
-  //     didOpen: () => {
-  //       Swal.showLoading();
-  //     },
-  //     allowOutsideClick: false,
-  //   });
-
-  //   try {
-  //     // Supabase does not have a direct CSV upload function via its JS client.
-  //     // You must use a separate backend or a Supabase Edge Function to handle this.
-  //     // I'll keep your old axios code but recommend migrating the endpoint to a Supabase Edge Function.
-  //     const formData = new FormData();
-  //     formData.append("csvFile", file);
-
-  //     // This part still relies on your old backend or a new one you set up
-  //     // to receive the CSV file and handle the insertion into Supabase.
-  //     const response = await axios.post(`${BASE_URL}/upload_csv`, formData, {
-  //       headers: {
-  //         "Content-Type": "multipart/form-data",
-  //       },
-  //     });
-
-  //     if (response.data.success) {
-  //       Swal.fire("Success", response.data.message, "success");
-  //       fetchOrders();
-  //     } else {
-  //       Swal.fire("Error", response.data.message || "Failed to upload CSV", "error");
-  //     }
-  //   } catch (error) {
-  //     const errorMessage = error.response?.data?.message || error.message || "Failed to upload CSV due to network error.";
-  //     Swal.fire("Error", errorMessage, "error");
-  //   }
-  // };
-
-  // The rendering logic remains the same
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
+      <Paper sx={{ padding: 3, textAlign: "center" }}>
         <CircularProgress />
-      </Box>
+      </Paper>
     );
   }
 
   if (error) {
     return (
-      <Box p={4} sx={{ mt: 10 }}>
+      <Paper sx={{ padding: 3 }}>
         <Alert severity="error">{error}</Alert>
-        <Box display="flex" alignItems="center" mb={4} mt={2}>
-          <Button variant="contained" color="primary" onClick={() => setIsAddOpen(true)}>
-            Add New Order
-          </Button>
-          <Button variant="outlined" component="label" sx={{ ml: 2 }}>
-            Upload CSV
-            {/* <input type="file" accept=".csv" hidden onChange={handleCSVUpload} /> */}
-          </Button>
-        </Box>
-      </Box>
+      </Paper>
     );
   }
 
   return (
-    <Box p={6} sx={{ mb: 4 }} mt={10}>
-      <Typography variant="h4" mb={4}>Information of Orders</Typography>
-      <Box display="flex" alignItems="center" mb={4}>
-        <Button variant="contained" color="primary" onClick={() => setIsAddOpen(true)}>
-          Add New Order
-        </Button>
-        <Button variant="outlined" component="label" sx={{ ml: 2 }}>
-          Upload CSV
-          {/* <input type="file" accept=".csv" hidden onChange={handleCSVUpload} /> */}
-        </Button>
-      </Box>
-      {orders.length > 0 ? (
-        orders.map((order) => (
-          <Accordion key={order.OrderSheet_ID || order.OrderNo}>
-            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-              <Typography sx={{ flexGrow: 1 }}>
-                <strong>Order No:</strong> {displayValue(order.OrderNo)} | <strong>Type:</strong> {displayValue(order.ItemType)} | <strong>QTY:</strong> {displayValue(order.QTY)}
-              </Typography>
-              <Box>
-                <IconButton onClick={(e) => { e.stopPropagation(); handleOpenEdit(order); }} color="primary" size="small" sx={{ mr: 1 }}>
-                  <EditIcon />
-                </IconButton>
-                <IconButton onClick={(e) => { e.stopPropagation(); handleDelete(order.OrderSheet_ID); }} color="error" size="small">
-                  <DeleteIcon />
-                </IconButton>
-              </Box>
-            </AccordionSummary>
-            <AccordionDetails>
-              <Paper elevation={1} sx={{ p: 2 }}>
-                <Grid container spacing={2}>
-                  {Object.entries(order).map(([label, value], i) => (
-                    <Grid item xs={12} sm={6} md={4} key={i}>
-                      <Typography variant="body2">
-                        <strong>{label}:</strong> {displayValue(value)}
-                      </Typography>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Paper>
-            </AccordionDetails>
-          </Accordion>
-        ))
-      ) : (
-        <Typography>No orders found. Add a new order or upload via CSV.</Typography>
-      )}
+    <Paper sx={{ padding: 3 }}>
+      <Typography variant="h5" gutterBottom>
+        Orders Manager
+      </Typography>
 
-      {[isAddOpen, isEditOpen].map((open, index) => (
-        <Dialog open={open} onClose={() => (index === 0 ? setIsAddOpen(false) : setIsEditOpen(false))} maxWidth="md" fullWidth key={index}>
-          <DialogTitle>{index === 0 ? "Add New Order" : "Edit Order"}</DialogTitle>
-          <DialogContent dividers>
-            <Grid container spacing={2}>
-              {(index === 0
-                ? Object.keys(initialFormState)
-                : [...Object.keys(initialFormState), "OrderSheet_ID"]
-              ).map((field) => (
-                <Grid item xs={12} sm={6} key={field}>
-                  <TextField
-                    label={field}
-                    name={field}
-                    value={formData[field] || ""}
-                    onChange={handleChange}
-                    fullWidth
+      <Button
+        variant="contained"
+        onClick={() => {
+          setFormData(initialFormState);
+          setEditingOrder(null);
+          setShowForm(true);
+        }}
+        sx={{ mb: 2 }}
+      >
+        + Add New Order
+      </Button>
+
+      <Collapse in={showForm}>
+        <Paper sx={{ padding: 2, mb: 3 }}>
+          <Typography variant="h6" sx={{ mb: 2 }}>
+            {editingOrder ? "Edit Order" : "Add New Order"}
+          </Typography>
+          <Grid container spacing={2}>
+            {Object.entries(formData).map(([key, value]) => (
+              <Grid item xs={12} sm={6} key={key}>
+                <TextField
+                  label={key.replace(/_/g, " ")}
+                  name={key}
+                  fullWidth
+                  value={value}
+                  onChange={handleChange}
+                  disabled={key === "OrderSheet_ID" && editingOrder}
+                  type={numericFields.includes(key) ? "number" : "text"}
+                />
+              </Grid>
+            ))}
+          </Grid>
+          <Button
+            variant="contained"
+            onClick={handleSubmit}
+            sx={{ mt: 2, mr: 1 }}
+          >
+            {editingOrder ? "Update" : "Create"}
+          </Button>
+          <Button variant="outlined" onClick={handleCancel} sx={{ mt: 2 }}>
+            Cancel
+          </Button>
+        </Paper>
+      </Collapse>
+
+      <Typography variant="h6" sx={{ mt: 3 }}>
+        Orders List
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>ID</TableCell>
+              <TableCell>Order No</TableCell>
+              <TableCell>Item Type</TableCell>
+              <TableCell>QTY</TableCell>
+              <TableCell>Brand</TableCell>
+              <TableCell>Model</TableCell>
+              <TableCell>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {orders.map((order) => (
+              <TableRow key={order.OrderSheet_ID}>
+                <TableCell>{order.OrderSheet_ID}</TableCell>
+                <TableCell>{order.OrderNo}</TableCell>
+                <TableCell>{order.ItemType}</TableCell>
+                <TableCell>{order.QTY}</TableCell>
+                <TableCell>{order.Brand}</TableCell>
+                <TableCell>{order.Model}</TableCell>
+                <TableCell>
+                  <Button
                     variant="outlined"
-                    type={field === "QTY" ? "number" : "text"}
-                    multiline={field === "Comment"}
-                    rows={field === "Comment" ? 3 : 1}
-                    InputProps={{ readOnly: field === "OrderSheet_ID" }}
-                  />
-                </Grid>
-              ))}
-            </Grid>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => (index === 0 ? setIsAddOpen(false) : setIsEditOpen(false))}>Cancel</Button>
-            <Button variant="contained" onClick={index === 0 ? handleAddOrder : handleUpdateOrder}>
-              {index === 0 ? "Add Order" : "Update Order"}
-            </Button>
-          </DialogActions>
-        </Dialog>
-      ))}
-    </Box>
+                    size="small"
+                    onClick={() => handleEdit(order)}
+                    sx={{ mr: 1 }}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    color="error"
+                    onClick={() => handleDelete(order.OrderSheet_ID)}
+                  >
+                    Delete
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Paper>
   );
 };
 

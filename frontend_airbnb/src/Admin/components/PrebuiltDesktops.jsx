@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import Swal from "sweetalert2";
 import {
   Paper,
   Typography,
@@ -17,9 +17,9 @@ import {
   TextField,
   Grid,
 } from "@mui/material";
-
+import axios from "axios";
 import { supabase } from "../../supabase/SupabaseClient";
-// Replace with your real backend URL
+
 const BASE_URL = "http://10.2.0.2:8000/api";
 
 const emptyDesktop = {
@@ -45,42 +45,33 @@ const PrebuiltDesktops = () => {
   const [editingDesktop, setEditingDesktop] = useState(null);
   const [formData, setFormData] = useState(emptyDesktop);
 
-  // const fetch_Inventory_Desktops = async () => {
-  //   setLoading(true);
-  //   try {
-  //     const res = await axios.get(`${BASE_URL}/GetAllPrebuiltDesktops`);
-  //     setDesktops(res.data.success ? res.data.data : []);
-  //   } catch (error) {
-  //     console.error("Error fetching desktops:", error);
-  //     setDesktops([]);
-  //   }
-  //   setLoading(false);
-  // };
+  const USE_SUPABASE = true;
 
-  // useEffect(() => {
-  //   fetch_Inventory_Desktops();
-  // }, []);
-
-  const fetch_Inventory_Desktops = async () => {
+  const fetchDesktops = async () => {
     setLoading(true);
     try {
-      // Supabase: SELECT * FROM your_table_name
-      // Replace 'your_table_name' with your actual Supabase table name.
-      const { data, error } = await supabase.from("Prebuilt_Desktops").select("*");
-      if (error) {
-        throw new Error(error.message);
+      if (USE_SUPABASE) {
+        const { data, error } = await supabase
+          .from("Prebuilt_Desktops")
+          .select("*");
+        if (error) throw error;
+        setDesktops(data);
+      } else {
+        const res = await axios.get(`${BASE_URL}/GetAllPrebuiltDesktops`);
+        setDesktops(res.data.success ? res.data.data : []);
       }
-      setDesktops(data);
       setError(null);
     } catch (err) {
-      setError("Failed to fetch orders");
+      console.error(err);
+      setError("Failed to fetch desktops");
+      setDesktops([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetch_Inventory_Desktops();
+    fetchDesktops();
   }, []);
 
   const handleOpenDialog = (desktop = null) => {
@@ -97,49 +88,73 @@ const PrebuiltDesktops = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
     if (!formData.Model || !formData.Brand || !formData.SERIAL_NO) {
-      alert("Model, Brand, and Serial No. are required.");
+      Swal.fire("Error", "Model, Brand, and Serial No. are required.", "error");
       return;
     }
 
     try {
-      // Remove Prebuilt_ID from payload
-      const { Prebuilt_ID, Prebuilt_Desktops_ID, ...payload } = formData;
-
+      const payload = { ...formData };
       if (editingDesktop) {
-        await axios.put(
-          `${BASE_URL}/UpdatePrebuiltDesktop/${editingDesktop.Prebuilt_Desktops_ID}`,
-          payload
-        );
+        if (USE_SUPABASE) {
+          await supabase
+            .from("Prebuilt_Desktops")
+            .update(payload)
+            .eq("Prebuilt_Desktops_ID", editingDesktop.Prebuilt_Desktops_ID);
+        } else {
+          await axios.put(
+            `${BASE_URL}/UpdatePrebuiltDesktop/${editingDesktop.Prebuilt_Desktops_ID}`,
+            payload
+          );
+        }
+        Swal.fire("Updated!", "Desktop inventory updated successfully.", "success");
       } else {
-        await axios.post(`${BASE_URL}/CreatePrebuiltDesktop`, payload);
+        if (USE_SUPABASE) {
+          await supabase.from("Prebuilt_Desktops").insert([payload]);
+        } else {
+          await axios.post(`${BASE_URL}/CreatePrebuiltDesktop`, payload);
+        }
+        Swal.fire("Added!", "Desktop inventory added successfully.", "success");
       }
 
-      fetch_Inventory_Desktops();
+      fetchDesktops();
       handleCloseDialog();
     } catch (error) {
-      console.error("Error saving desktop:", error);
-      alert("Failed to save desktop. Check console for details.");
+      console.error(error);
+      Swal.fire("Error", "Failed to save desktop. Check console for details.", "error");
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this desktop?"))
-      return;
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
-      await axios.delete(`${BASE_URL}/DeletePrebuiltDesktop/${id}`);
-      fetch_Inventory_Desktops();
+      if (USE_SUPABASE) {
+        await supabase
+          .from("Prebuilt_Desktops")
+          .delete()
+          .eq("Prebuilt_Desktops_ID", id);
+      } else {
+        await axios.delete(`${BASE_URL}/DeletePrebuiltDesktop/${id}`);
+      }
+      Swal.fire("Deleted!", "Desktop inventory has been deleted.", "success");
+      fetchDesktops();
     } catch (error) {
-      console.error("Error deleting desktop:", error);
-      alert("Failed to delete desktop.");
+      console.error(error);
+      Swal.fire("Error", "Failed to delete desktop.", "error");
     }
   };
 
@@ -212,15 +227,8 @@ const PrebuiltDesktops = () => {
         </Table>
       </TableContainer>
 
-      <Dialog
-        open={openDialog}
-        onClose={handleCloseDialog}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {editingDesktop ? "Edit Desktop" : "Add New Desktop"}
-        </DialogTitle>
+      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+        <DialogTitle>{editingDesktop ? "Edit Desktop" : "Add New Desktop"}</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             {[

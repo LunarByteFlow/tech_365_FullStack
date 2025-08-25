@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Paper,
   Typography,
@@ -15,10 +14,8 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { v4 as uuidv4 } from "uuid";
-
-import { supabase } from "../../supabase/SupabaseClient"; // <-- Import your Supabase client
-const BASE_URL = "http://192.168.0.50:8000/api";
+import Swal from "sweetalert2";
+import { supabase } from "../../supabase/SupabaseClient";
 
 const initialFormState = {
   Facility: "",
@@ -33,138 +30,48 @@ const initialFormState = {
   QTY_On_Hand: "",
 };
 
+const numericFields = ["QTY_Recieved", "QTY_On_Hand"];
+const sanitizeFormData = (data) => {
+  const sanitized = { ...data };
+  numericFields.forEach((field) => {
+    sanitized[field] =
+      sanitized[field] === "" || sanitized[field] === null
+        ? null
+        : Number(sanitized[field]);
+  });
+  return sanitized;
+};
+
 const InventoryDesktops = () => {
   const [inventoryList, setInventoryList] = useState([]);
   const [form, setForm] = useState(initialFormState);
   const [filters, setFilters] = useState(initialFormState);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [message, setMessage] = useState(null);
+  const [error, setError] = useState("");
 
-  // useEffect(() => {
-  //   fetch_Inventory_Desktops();
-  // }, []);
+  // Fetch all desktops
+  const fetchInventory = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.from("Inventory_Desktops").select("*");
+      if (error) throw error;
+      setInventoryList(data);
+      setError("");
+    } catch (err) {
+      setError(err.message || "Failed to fetch inventory.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // const fetch_Inventory_Desktops = async () => {
-  //   setLoading(true);
-  //   setError(null);
-  //   setMessage(null);
-  //   try {
-  //     const res = await axios.get(`${BASE_URL}/Get_AllDesktopInventory`);
-  //     if (res.data.success) {
-  //       setInventoryList(res.data.data || []);
-  //     } else {
-  //       setInventoryList([]);
-  //       setMessage(res.data.message || "No desktop inventory records found.");
-  //     }
-  //   } catch (err) {
-  //     setError("Failed to fetch inventory.");
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-
-  const fetch_Inventory_Desktops = async () => {
-        setLoading(true);
-        try {
-          // Supabase: SELECT * FROM your_table_name
-          // Replace 'your_table_name' with your actual Supabase table name.
-          const { data, error } = await supabase.from("Inventory_Desktops").select("*");
-          if (error) {
-            throw new Error(error.message);
-          }
-          setInventoryList(data);
-          setError(null);
-        } catch (err) {
-          setError("Failed to fetch orders");
-        } finally {
-          setLoading(false);
-        }
-      };
-    useEffect(() => {
-      fetch_Inventory_Desktops();
-    }, []);
+  useEffect(() => {
+    fetchInventory();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const val =
-      name === "QTY_Recieved" || name === "QTY_On_Hand"
-        ? value === ""
-          ? ""
-          : Number(value)
-        : value;
-    setForm((prev) => ({ ...prev, [name]: val }));
-  };
-
-  const handleSubmit = async () => {
-    setError(null);
-    setMessage(null);
-    try {
-      let payload = { ...form };
-
-      if (!editingId) {
-        payload.Inventory_Desktops_ID = uuidv4();
-        const res = await axios.post(
-          `${BASE_URL}/Create_DesktopInventory`,
-          payload
-        );
-        if (!res.data.success)
-          throw new Error(res.data.message || "Create failed");
-        setMessage("Desktop inventory item created successfully!");
-      } else {
-        const res = await axios.put(
-          `${BASE_URL}/Update_DesktopInventory/${editingId}`,
-          payload
-        );
-        if (!res.data.success)
-          throw new Error(res.data.message || "Update failed");
-        setMessage("Desktop inventory item updated successfully!");
-      }
-
-      fetch_Inventory_Desktops();
-      setForm(initialFormState);
-      setEditingId(null);
-    } catch (err) {
-      setError(err.message || "Error submitting data.");
-    }
-  };
-
-  const handleEdit = (item) => {
-    setEditingId(item.Inventory_Desktops_ID);
-    setForm({
-      ...item,
-      QTY_Recieved: item.QTY_Recieved || "",
-      QTY_On_Hand: item.QTY_On_Hand || "",
-    });
-    setError(null);
-    setMessage(null);
-  };
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setForm(initialFormState);
-    setError(null);
-    setMessage(null);
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) return;
-
-    setError(null);
-    setMessage(null);
-    try {
-      const res = await axios.delete(
-        `${BASE_URL}/Delete_DesktopInventory/${id}`
-      );
-      if (!res.data.success)
-        throw new Error(res.data.message || "Delete failed");
-      setMessage("Desktop inventory item deleted successfully!");
-      fetch_Inventory_Desktops();
-    } catch (err) {
-      setError(err.message || "Error deleting item.");
-    }
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFilterChange = (e) => {
@@ -174,7 +81,7 @@ const InventoryDesktops = () => {
 
   const filteredInventoryList = inventoryList.filter((item) =>
     Object.keys(filters).every((key) => {
-      if (filters[key] === "") return true;
+      if (!filters[key]) return true;
       return item[key]
         ?.toString()
         .toLowerCase()
@@ -182,12 +89,65 @@ const InventoryDesktops = () => {
     })
   );
 
+  const handleSubmit = async () => {
+    const sanitizedData = sanitizeFormData(form);
+    try {
+      if (editingId) {
+        // UPDATE
+        const { error } = await supabase
+          .from("Inventory_Desktops")
+          .update(sanitizedData)
+          .eq("Inventory_Desktops_ID", editingId);
+        if (error) throw error;
+        Swal.fire("Success", "Desktop inventory updated successfully!", "success");
+      } else {
+        // CREATE
+        const { error } = await supabase
+          .from("Inventory_Desktops")
+          .insert([sanitizedData]);
+        if (error) throw error;
+        Swal.fire("Success", "Desktop inventory created successfully!", "success");
+      }
+      setForm(initialFormState);
+      setEditingId(null);
+      fetchInventory();
+    } catch (err) {
+      Swal.fire("Error", err.message || "Operation failed", "error");
+    }
+  };
+
+  const handleEdit = (item) => {
+    setEditingId(item.Inventory_Desktops_ID);
+    setForm({ ...item });
+    setError("");
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setForm(initialFormState);
+    setError("");
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this desktop?")) return;
+
+    try {
+      const { error } = await supabase
+        .from("Inventory_Desktops")
+        .delete()
+        .eq("Inventory_Desktops_ID", id);
+      if (error) throw error;
+      Swal.fire("Deleted!", "Desktop inventory deleted successfully!", "success");
+      fetchInventory();
+    } catch (err) {
+      Swal.fire("Error", err.message || "Failed to delete desktop", "error");
+    }
+  };
+
   return (
     <Paper sx={{ p: 3, maxWidth: 1200, margin: "2rem auto" }}>
       <Typography variant="h5" gutterBottom>
-        {editingId
-          ? "Update Desktop Inventory"
-          : "Create New Desktop Inventory"}
+        {editingId ? "Update Desktop Inventory" : "Create New Desktop Inventory"}
       </Typography>
 
       {error && (
@@ -195,24 +155,11 @@ const InventoryDesktops = () => {
           {error}
         </Alert>
       )}
-      {message && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {message}
-        </Alert>
-      )}
 
-      <Stack
-        direction="row"
-        spacing={3}
-        flexWrap="wrap"
-        rowGap={3}
-        columnGap={3}
-        sx={{ mb: 4 }}
-      >
+      <Stack direction="row" spacing={3} flexWrap="wrap" rowGap={3} columnGap={3} sx={{ mb: 4 }}>
         {Object.keys(initialFormState).map((field) => {
           const label = field.replace(/_/g, " ").replace("QTY", "Quantity");
-          const isNumberField =
-            field === "QTY_Recieved" || field === "QTY_On_Hand";
+          const isNumberField = numericFields.includes(field);
           return (
             <TextField
               key={field}
@@ -244,14 +191,7 @@ const InventoryDesktops = () => {
         Filter Desktop Inventory
       </Typography>
 
-      <Stack
-        direction="row"
-        spacing={3}
-        flexWrap="wrap"
-        rowGap={2}
-        columnGap={3}
-        sx={{ mb: 4 }}
-      >
+      <Stack direction="row" spacing={3} flexWrap="wrap" rowGap={2} columnGap={3} sx={{ mb: 4 }}>
         {Object.keys(initialFormState).map((field) => {
           const label = field.replace(/_/g, " ").replace("QTY", "Quantity");
           return (

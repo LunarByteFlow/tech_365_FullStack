@@ -1,5 +1,244 @@
+// import React, { useEffect, useState } from "react";
+// import axios from "axios";
+// import {
+//   Paper,
+//   Typography,
+//   Button,
+//   Table,
+//   TableBody,
+//   TableCell,
+//   TableContainer,
+//   TableHead,
+//   TableRow,
+//   TextField,
+//   Grid,
+//   Collapse,
+// } from "@mui/material";
+// import { supabase } from "../../supabase/SupabaseClient";
+// const InventoryParts = () => {
+//   const BASE_URL = "http://10.2.0.2:8000/api";
+
+//   const [parts, setParts] = useState([]);
+//   const [editingPart, setEditingPart] = useState(null);
+//   const [showForm, setShowForm] = useState(false); // 👈 NEW STATE
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState(null);
+//   const [formData, setFormData] = useState({
+//     id: "",
+//     Facility: "",
+//     Location_: "",
+//     Brand: "",
+//     Model: "",
+//     Type_: "",
+//     Comments: "",
+//     QTY_Recieved: "",
+//     QTY_On_Hand: "",
+//   });
+
+//   const generateID = () => "PART-" + Date.now();
+
+//   // const fetch_Inventory_Parts = async () => {
+//   //   try {
+//   //     const res = await axios.get(`${BASE_URL}/Get_AllPartInventory`);
+//   //     setParts(res.data.data || []);
+//   //   } catch (error) {
+//   //     console.error("Fetch error:", error);
+//   //   }
+//   // };
+
+//   // useEffect(() => {
+//   //   fetch_Inventory_Parts();
+//   // }, []);
+
+//   const fetch_Inventory_Parts = async () => {
+//     setLoading(true);
+//     try {
+//       // Supabase: SELECT * FROM your_table_name
+//       // Replace 'your_table_name' with your actual Supabase table name.
+//       const { data, error } = await supabase
+//         .from("Inventory_Parts")
+//         .select("*");
+//       if (error) {
+//         throw new Error(error.message);
+//       }
+//       setParts(data);
+//       setError(null);
+//     } catch (err) {
+//       setError("Failed to fetch orders");
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   useEffect(() => {
+//     fetch_Inventory_Parts();
+//   }, []);
+
+//   const handleDelete = async (id) => {
+//     try {
+//       await axios.delete(`${BASE_URL}/Delete_PartInventory/${id}`);
+//       fetch_Inventory_Parts();
+//     } catch (error) {
+//       console.error("Delete error:", error);
+//     }
+//   };
+
+//   const handleEdit = (part) => {
+//     setEditingPart(part);
+//     setFormData({ ...part });
+//     setShowForm(true);
+//   };
+
+//   const handleCancel = () => {
+//     setEditingPart(null);
+//     resetForm();
+//     setShowForm(false);
+//   };
+
+//   const resetForm = () => {
+//     setFormData({
+//       Facility: "",
+//       Location_: "",
+//       Brand: "",
+//       Model: "",
+//       Type_: "",
+//       Comments: "",
+//       QTY_Recieved: "",
+//       QTY_On_Hand: "",
+//     });
+//   };
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const handleSubmit = async () => {
+//     try {
+//       if (editingPart) {
+//         await axios.put(
+//           `${BASE_URL}/Update_PartInventory/${editingPart.id}`,
+//           formData
+//         );
+//       } else {
+//         await axios.post(`${BASE_URL}/Create_PartInventory`, formData);
+//       }
+//       fetch_Inventory_Parts();
+//       handleCancel();
+//     } catch (error) {
+//       console.error("Submit error:", error);
+//     }
+//   };
+
+//   return (
+//     <Paper sx={{ padding: 3 }}>
+//       <Typography variant="h5" gutterBottom>
+//         Inventory Parts Manager
+//       </Typography>
+
+//       <Button
+//         variant="contained"
+//         onClick={() => {
+//           resetForm();
+//           setShowForm(true);
+//         }}
+//         sx={{ mb: 2 }}
+//       >
+//         + Add New Part
+//       </Button>
+
+//       {/* Conditional Form */}
+//       <Collapse in={showForm}>
+//         <Paper sx={{ padding: 2, mb: 3 }}>
+//           <Typography variant="h6" sx={{ mb: 2 }}>
+//             {editingPart ? "Edit Part" : "Add New Part"}
+//           </Typography>
+//           <Grid container spacing={2}>
+//             {Object.entries(formData).map(([key, value]) => (
+//               <Grid item xs={12} sm={6} key={key}>
+//                 <TextField
+//                   label={key.replace(/_/g, " ")}
+//                   name={key}
+//                   fullWidth
+//                   value={value}
+//                   onChange={handleChange}
+//                   disabled={key === "id" && editingPart}
+//                 />
+//               </Grid>
+//             ))}
+//           </Grid>
+//           <Button
+//             variant="contained"
+//             onClick={handleSubmit}
+//             sx={{ mt: 2, mr: 1 }}
+//           >
+//             {editingPart ? "Update" : "Create"}
+//           </Button>
+//           <Button variant="outlined" onClick={handleCancel} sx={{ mt: 2 }}>
+//             Cancel
+//           </Button>
+//         </Paper>
+//       </Collapse>
+
+//       {/* Table Section */}
+//       <Typography variant="h6" sx={{ mt: 3 }}>
+//         Inventory List
+//       </Typography>
+//       <TableContainer component={Paper}>
+//         <Table>
+//           <TableHead>
+//             <TableRow>
+//               <TableCell>ID</TableCell>
+//               <TableCell>Facility</TableCell>
+
+//               <TableCell>Brand</TableCell>
+//               <TableCell>Model</TableCell>
+//               <TableCell>Location</TableCell>
+//               <TableCell>Type</TableCell>
+//               <TableCell>QTY On Hand</TableCell>
+//               <TableCell>Actions</TableCell>
+//             </TableRow>
+//           </TableHead>
+//           <TableBody>
+//             {parts.map((part) => (
+//               <TableRow key={part.id}>
+//                 <TableCell>{part.id}</TableCell>
+//                 <TableCell>{part.Facility}</TableCell>
+
+//                 <TableCell>{part.Brand}</TableCell>
+//                 <TableCell>{part.Model}</TableCell>
+//                 <TableCell>{part.Location_}</TableCell>
+//                 <TableCell>{part.Type_}</TableCell>
+//                 <TableCell>{part.QTY_On_Hand}</TableCell>
+//                 <TableCell>
+//                   <Button
+//                     variant="outlined"
+//                     size="small"
+//                     onClick={() => handleEdit(part)}
+//                     sx={{ mr: 1 }}
+//                   >
+//                     Edit
+//                   </Button>
+//                   <Button
+//                     variant="outlined"
+//                     size="small"
+//                     color="error"
+//                     onClick={() => handleDelete(part.id)}
+//                   >
+//                     Delete
+//                   </Button>
+//                 </TableCell>
+//               </TableRow>
+//             ))}
+//           </TableBody>
+//         </Table>
+//       </TableContainer>
+//     </Paper>
+//   );
+// };
+
+// export default InventoryParts;
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import {
   Paper,
   Typography,
@@ -13,71 +252,87 @@ import {
   TextField,
   Grid,
   Collapse,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
+import Swal from "sweetalert2";
 import { supabase } from "../../supabase/SupabaseClient";
-const InventoryParts = () => {
-  const BASE_URL = "http://10.2.0.2:8000/api";
 
+const initialFormState = {
+  Facility: "",
+  Location_: "",
+  Brand: "",
+  Model: "",
+  Type_: "",
+  Comments: "",
+  QTY_Recieved: "",
+  QTY_On_Hand: "",
+};
+
+const InventoryParts = () => {
   const [parts, setParts] = useState([]);
   const [editingPart, setEditingPart] = useState(null);
-  const [showForm, setShowForm] = useState(false); // 👈 NEW STATE
-const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({
-    id: "",
-    Facility: "",
-    Location_: "",
-    Brand: "",
-    Model: "",
-    Type_: "",
-    Comments: "",
-    QTY_Recieved: "",
-    QTY_On_Hand: "",
-  });
+  const [formData, setFormData] = useState(initialFormState);
 
-  const generateID = () => "PART-" + Date.now();
-
-  // const fetch_Inventory_Parts = async () => {
-  //   try {
-  //     const res = await axios.get(`${BASE_URL}/Get_AllPartInventory`);
-  //     setParts(res.data.data || []);
-  //   } catch (error) {
-  //     console.error("Fetch error:", error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetch_Inventory_Parts();
-  // }, []);
-
-  const fetch_Inventory_Parts = async () => {
-      setLoading(true);
-      try {
-        // Supabase: SELECT * FROM your_table_name
-        // Replace 'your_table_name' with your actual Supabase table name.
-        const { data, error } = await supabase.from("Inventory_Parts").select("*");
-        if (error) {
-          throw new Error(error.message);
-        }
-        setParts(data);
-        setError(null);
-      } catch (err) {
-        setError("Failed to fetch orders");
-      } finally {
-        setLoading(false);
-      }
-    };
-  
-    useEffect(() => {
-      fetch_Inventory_Parts();
-    }, []);
-
-  const handleDelete = async (id) => {
+  // Fetch all inventory parts
+  const fetchParts = async () => {
+    setLoading(true);
     try {
-      await axios.delete(`${BASE_URL}/Delete_PartInventory/${id}`);
-      fetch_Inventory_Parts();
-    } catch (error) {
-      console.error("Delete error:", error);
+      const { data, error } = await supabase
+        .from("Inventory_Parts")
+        .select("*");
+      if (error) throw error;
+      setParts(data);
+      setError(null);
+    } catch (err) {
+      setError("Failed to fetch inventory parts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchParts();
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleCancel = () => {
+    setEditingPart(null);
+    setFormData(initialFormState);
+    setShowForm(false);
+  };
+
+  // Add or Update part
+  const handleSubmit = async () => {
+    try {
+      if (editingPart) {
+        // Update existing part
+        const { error } = await supabase
+          .from("Inventory_Parts")
+          .update(formData) // PK is not included here
+          .eq("Inventory_Parts_ID", editingPart.Inventory_Parts_ID);
+        if (error) throw error;
+        Swal.fire("Success", "Part updated successfully!", "success");
+      } else {
+        // Add new part (do not include Inventory_Parts_ID)
+        const { error } = await supabase
+          .from("Inventory_Parts")
+          .insert([formData]);
+        if (error) throw error;
+        Swal.fire("Success", "Part added successfully!", "success");
+      }
+
+      handleCancel();
+      fetchParts();
+    } catch (err) {
+      Swal.fire("Error", err.message || "Operation failed", "error");
     }
   };
 
@@ -87,46 +342,45 @@ const [loading, setLoading] = useState(true);
     setShowForm(true);
   };
 
-  const handleCancel = () => {
-    setEditingPart(null);
-    resetForm();
-    setShowForm(false);
-  };
-
-  const resetForm = () => {
-    setFormData({
-      Facility: "",
-      Location_: "",
-      Brand: "",
-      Model: "",
-      Type_: "",
-      Comments: "",
-      QTY_Recieved: "",
-      QTY_On_Hand: "",
+  const handleDelete = async (Inventory_Parts_ID) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, delete it!",
     });
-  };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async () => {
-    try {
-      if (editingPart) {
-        await axios.put(
-          `${BASE_URL}/Update_PartInventory/${editingPart.id}`,
-          formData
-        );
-      } else {
-        await axios.post(`${BASE_URL}/Create_PartInventory`, formData);
+    if (result.isConfirmed) {
+      try {
+        const { error } = await supabase
+          .from("Inventory_Parts")
+          .delete()
+          .eq("Inventory_Parts_ID", Inventory_Parts_ID);
+        if (error) throw error;
+        Swal.fire("Deleted!", "Part deleted successfully!", "success");
+        fetchParts();
+      } catch (err) {
+        Swal.fire("Error", err.message || "Failed to delete part", "error");
       }
-      fetch_Inventory_Parts();
-      handleCancel();
-    } catch (error) {
-      console.error("Submit error:", error);
     }
   };
+
+  if (loading) {
+    return (
+      <Paper sx={{ padding: 3, textAlign: "center" }}>
+        <CircularProgress />
+      </Paper>
+    );
+  }
+
+  if (error) {
+    return (
+      <Paper sx={{ padding: 3 }}>
+        <Alert severity="error">{error}</Alert>
+      </Paper>
+    );
+  }
 
   return (
     <Paper sx={{ padding: 3 }}>
@@ -137,7 +391,8 @@ const [loading, setLoading] = useState(true);
       <Button
         variant="contained"
         onClick={() => {
-          resetForm();
+          setFormData(initialFormState);
+          setEditingPart(null);
           setShowForm(true);
         }}
         sx={{ mb: 2 }}
@@ -160,7 +415,7 @@ const [loading, setLoading] = useState(true);
                   fullWidth
                   value={value}
                   onChange={handleChange}
-                  disabled={key === "id" && editingPart}
+                  disabled={key === "Inventory_Parts_ID" && editingPart}
                 />
               </Grid>
             ))}
@@ -188,7 +443,6 @@ const [loading, setLoading] = useState(true);
             <TableRow>
               <TableCell>ID</TableCell>
               <TableCell>Facility</TableCell>
-
               <TableCell>Brand</TableCell>
               <TableCell>Model</TableCell>
               <TableCell>Location</TableCell>
@@ -199,10 +453,9 @@ const [loading, setLoading] = useState(true);
           </TableHead>
           <TableBody>
             {parts.map((part) => (
-              <TableRow key={part.id}>
-                <TableCell>{part.id}</TableCell>
+              <TableRow key={part.Inventory_Parts_ID}>
+                <TableCell>{part.Inventory_Parts_ID}</TableCell>
                 <TableCell>{part.Facility}</TableCell>
-
                 <TableCell>{part.Brand}</TableCell>
                 <TableCell>{part.Model}</TableCell>
                 <TableCell>{part.Location_}</TableCell>
@@ -221,7 +474,7 @@ const [loading, setLoading] = useState(true);
                     variant="outlined"
                     size="small"
                     color="error"
-                    onClick={() => handleDelete(part.id)}
+                    onClick={() => handleDelete(part.Inventory_Parts_ID)}
                   >
                     Delete
                   </Button>
@@ -236,3 +489,4 @@ const [loading, setLoading] = useState(true);
 };
 
 export default InventoryParts;
+
