@@ -302,6 +302,7 @@
 // export default DisplayOrders;
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import Papa from "papaparse";
 import {
   Paper,
   Typography,
@@ -344,19 +345,6 @@ const initialFormState = {
   Prebuilt_Or_Inventory: "",
 };
 
-const numericFields = ["QTY"];
-
-const sanitizeFormData = (data) => {
-  const sanitized = { ...data };
-  numericFields.forEach((field) => {
-    sanitized[field] =
-      sanitized[field] === "" || sanitized[field] === null
-        ? null
-        : Number(sanitized[field]);
-  });
-  return sanitized;
-};
-
 const DisplayOrders = () => {
   const [orders, setOrders] = useState([]);
   const [editingOrder, setEditingOrder] = useState(null);
@@ -396,19 +384,15 @@ const DisplayOrders = () => {
 
   const handleSubmit = async () => {
     try {
-      const sanitizedData = sanitizeFormData(formData);
-
       if (editingOrder) {
-        // UPDATE
         const { error } = await supabase
           .from("OrderSheet")
-          .update(sanitizedData)
+          .update(formData)
           .eq("OrderSheet_ID", editingOrder.OrderSheet_ID);
         if (error) throw error;
         Swal.fire("Success", "Order updated successfully!", "success");
       } else {
-        // ADD
-        const { error } = await supabase.from("OrderSheet").insert([sanitizedData]);
+        const { error } = await supabase.from("OrderSheet").insert([formData]);
         if (error) throw error;
         Swal.fire("Success", "Order added successfully!", "success");
       }
@@ -422,7 +406,7 @@ const DisplayOrders = () => {
 
   const handleEdit = (order) => {
     setEditingOrder(order);
-    setFormData({ ...order, QTY: order.QTY?.toString() || "" });
+    setFormData(order);
     setShowForm(true);
   };
 
@@ -437,7 +421,10 @@ const DisplayOrders = () => {
 
     if (result.isConfirmed) {
       try {
-        const { error } = await supabase.from("OrderSheet").delete().eq("OrderSheet_ID", OrderSheet_ID);
+        const { error } = await supabase
+          .from("OrderSheet")
+          .delete()
+          .eq("OrderSheet_ID", OrderSheet_ID);
         if (error) throw error;
         Swal.fire("Deleted!", "Order deleted successfully!", "success");
         fetchOrders();
@@ -447,21 +434,48 @@ const DisplayOrders = () => {
     }
   };
 
-  if (loading) {
+  // CSV Upload
+  const handleCSVUpload = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        let rows = results.data;
+
+        // Remove the OrderSheet_ID column if it exists
+        rows = rows.map(({ OrderSheet_ID, ...rest }) => rest);
+
+        try {
+          const { error } = await supabase.from("OrderSheet").insert(rows);
+          if (error) throw error;
+          Swal.fire(
+            "Success",
+            "CSV uploaded and saved successfully!",
+            "success"
+          );
+          fetchOrders();
+        } catch (err) {
+          Swal.fire("Error", err.message || "Failed to save CSV data", "error");
+        }
+      },
+    });
+  };
+
+  if (loading)
     return (
       <Paper sx={{ padding: 3, textAlign: "center" }}>
         <CircularProgress />
       </Paper>
     );
-  }
-
-  if (error) {
+  if (error)
     return (
       <Paper sx={{ padding: 3 }}>
         <Alert severity="error">{error}</Alert>
       </Paper>
     );
-  }
 
   return (
     <Paper sx={{ padding: 3 }}>
@@ -476,9 +490,14 @@ const DisplayOrders = () => {
           setEditingOrder(null);
           setShowForm(true);
         }}
-        sx={{ mb: 2 }}
+        sx={{ mb: 2, mr: 2 }}
       >
         + Add New Order
+      </Button>
+
+      <Button variant="outlined" component="label" sx={{ mb: 2 }}>
+        Upload CSV
+        <input type="file" accept=".csv" hidden onChange={handleCSVUpload} />
       </Button>
 
       <Collapse in={showForm}>
@@ -496,7 +515,6 @@ const DisplayOrders = () => {
                   value={value}
                   onChange={handleChange}
                   disabled={key === "OrderSheet_ID" && editingOrder}
-                  type={numericFields.includes(key) ? "number" : "text"}
                 />
               </Grid>
             ))}
