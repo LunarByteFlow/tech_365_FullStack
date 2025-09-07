@@ -20,6 +20,7 @@ import InventoryUploader from "./components/InventoryUploader.jsx";
 import CombinedOrders from "./components/CombinedOrders.jsx";
 import RegisterUser from "./components/RegisterUser.jsx";
 import AdminLayout from "./components/AdminLayout.jsx";
+import Dashboard from "./Dashboard.jsx";
 
 export default function Admin() {
   return (
@@ -44,6 +45,7 @@ export default function Admin() {
           <Route path="inventory_parts" element={<InventoryParts />} />
           <Route path="InventoryUploader" element={<InventoryUploader />} />
           <Route path="CombinedOrders" element={<CombinedOrders />} />
+          <Route path="Dashboard" element={<Dashboard />}></Route>
           <Route path="*" element={<AdminHome />} />
         </Route>
       </Routes>

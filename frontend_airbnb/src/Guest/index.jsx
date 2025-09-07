@@ -1,7 +1,7 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import UserLoginPage from "./components/UserLoginPage.jsx";
-import Navbar from "./components/GuestNavbar.jsx";
+// import Navbar from "../Admin/components/GuestNavbar.jsx";
 import Admin from "../Admin/index.js";
 import RegisterUser from "../Admin/components/RegisterUser.jsx";
 import AddNewOrder from "./pages/AddNewOrder";
@@ -12,7 +12,7 @@ import DisplayInventoryOrder from "./pages/DisplayInventoryOrder.jsx";
 import UpdateOrderForm from "./pages/UpdateOrderForm.jsx";
 import GuestHome from "./pages/GuestHome";
 import AdminHome from "../Admin/components/AdminHome.jsx";
-import GuestNavbar from "../Guest/components/GuestNavbar.jsx";
+// import GuestNavbar from "../Admin/components/GuestNavbar.jsx";
 import Footer from "./pages/Footer.jsx";
 import InventoryHome from "../Inventory/components/InventoryHome.jsx";
 import ProductFinishHome from "../ProductFinish/components/ProductFinishHome.jsx";
@@ -20,6 +20,8 @@ import Inventory from "../Inventory/index.js";
 import Technician from "../Technician/index.js";
 import ProductFinish from "../ProductFinish/index.js";
 import TechnicianHome from "../Technician/components/TechnicianHome.jsx"
+import Dashboard from "../Admin/Dashboard.jsx";
+import GuestNavbar from "./components/GuestNavbar.jsx"
 export default function Guest() {
   return (
     <>
@@ -36,6 +38,8 @@ export default function Guest() {
         <Route path="/login" element={<UserLoginPage />} />
         <Route path="/Get_Dispatch" element={<DisplayDispatch />}></Route>
         <Route path="/Get_Orders" element={<DisplayOrders />}></Route>
+        
+
         <Route
           path="/Get_Inventory_Check"
           element={<DisplayInventoryCheck />}

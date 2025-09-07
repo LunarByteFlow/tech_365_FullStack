@@ -109,8 +109,8 @@ const AdminNavbar = () => {
     { text: "Stock", to: "low-stock" },
     { text: "Download Monthly CSV reports", to: "download_csv" },
     { text: "InventoryUploader", to: "InventoryUploader" },
-    { text: "CombinedOrders", to: "CombinedOrders" },
-    { text: "Dispatch", to: "Get_Dispatch" },
+    { text: "Dashboard", to: "Dashboard" },
+
 
   ];
 
